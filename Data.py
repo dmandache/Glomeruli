@@ -5,6 +5,7 @@ import glob
 import hashlib
 import argparse
 import warnings
+import shutil
 
 import six
 import numpy as np
@@ -18,6 +19,7 @@ from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import (ImageDataGenerator, Iterator,
                                        array_to_img, img_to_array, load_img)
 from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
+from keras.utils import plot_model
 
 RANDOM_SEED = 0
 MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
@@ -364,8 +366,8 @@ def get_model(num_classes, weights='imagenet'):
     # create the base pre-trained model
     # , input_tensor=input_tensor
 
-    base_model = InceptionV3(weights=None, include_top=False)
-    base_model.load_weights('inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5')
+    base_model = InceptionV3(weights='imagenet', include_top=False)
+    #base_model.load_weights('inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5')
 
     # add a global spatial average pooling layer
     x = base_model.output
@@ -433,18 +435,51 @@ def main(image_dir, validation_pct):
     print("Using validation percent of %{}".format(validation_pct))
     image_lists = create_image_lists(image_dir, validation_pct)
 
-    generators = get_generators(image_lists, image_dir)
+    train_datagen = ImageDataGenerator(
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
+
+    test_datagen = ImageDataGenerator()
+
+    train_generator = train_datagen.flow_from_directory(
+        'data/train',
+        target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
+        batch_size=BATCH_SIZE,
+        class_mode='binary')  # since we use binary_crossentropy loss, we need binary labels
+
+    # this is a similar generator, for validation data
+    validation_generator = test_datagen.flow_from_directory(
+        'data/validation',
+        target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
+        batch_size=BATCH_SIZE,
+        class_mode='binary')
+
+    #generators = get_generators(image_lists, image_dir)
 
     model = get_model(num_classes)
 
     # Get and train the top layers.
     model = get_top_layer_model(model)
-    model = train_model(model, epochs=10, generators=generators)
+    #model = train_model(model, epochs=10, generators=generators)
+    model.fit_generator(
+        train_generator,
+        steps_per_epoch=STEPS_PER_EPOCH,
+        validation_data=validation_generator,
+        validation_steps=VALIDATION_STEPS,
+        epochs=10,
+        callbacks=None)
 
     # Get and train the mid layers.
     model = get_mid_layer_model(model)
-    _ = train_model(model, epochs=100, generators=generators,
-                    callbacks=[checkpointer, early_stopper, tensorboard])
+    #_ = train_model(model, epochs=100, generators=generators, callbacks=[checkpointer, early_stopper, tensorboard])
+    model.fit_generator(
+        train_generator,
+        steps_per_epoch=STEPS_PER_EPOCH,
+        validation_data=validation_generator,
+        validation_steps=VALIDATION_STEPS,
+        epochs=100,
+        callbacks=[checkpointer, early_stopper, tensorboard])
 
     # save model
     model.save('./output/model.hdf5', overwrite=True)
@@ -457,14 +492,86 @@ if __name__ == '__main__':
     parser.add_argument('--validation-pct', default=10, help='validation percentage')
     args = parser.parse_args()
 
-    os.makedirs('./output/checkpoints/', exist_ok=True)
-
     main(**vars(args))
     '''
 
-    #os.makedirs('./output/checkpoints/', exist_ok=True)
+    os.makedirs('./output/checkpoints/', exist_ok=True)
 
     IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/"
-    VALIDATION_PCT = 10.0
+    VALIDATION_SPLIT = 0.2
+    DATA_IS_SPLIT = True
 
-    main(IMAGES_DIR_PATH, VALIDATION_PCT)
+    DIR_TRAIN_GLOM = IMAGES_DIR_PATH + "/train/glomeruli"
+    DIR_TEST_GLOM = IMAGES_DIR_PATH + "/test/glomeruli"
+    DIR_TRAIN_NONGLOM = IMAGES_DIR_PATH + "/train/nonglomeruli"
+    DIR_TEST_NONGLOM = IMAGES_DIR_PATH + "/test/nonglomeruli"
+
+    if DATA_IS_SPLIT:
+        pass
+    else:                                                   # Split data into train and validation
+        files_glom = os.listdir(DIR_TRAIN_GLOM)
+        files_nonglom = os.listdir(DIR_TRAIN_NONGLOM)
+
+        for f in files_glom:
+            if np.random.rand(1) < VALIDATION_SPLIT:
+                shutil.move(DIR_TRAIN_GLOM + '/' + f, DIR_TEST_GLOM + '/' + f)
+
+        for i in files_nonglom:
+            if np.random.rand(1) < VALIDATION_SPLIT:
+                shutil.move(DIR_TRAIN_NONGLOM + '/' + i, DIR_TEST_NONGLOM + '/' + i)
+
+    print('Trainset\tglomeruli:\t' + str(len(os.listdir(DIR_TRAIN_GLOM))))
+    print('\t\tnon-glomeruli:\t' + str(len(os.listdir(DIR_TRAIN_NONGLOM))))
+    print('Testset\tglomeruli:\t' + str(len(os.listdir(DIR_TEST_GLOM))))
+    print('\t\tnon-glomeruli:\t' + str(len(os.listdir(DIR_TEST_NONGLOM))))
+
+    TRAIN_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/train"
+    TEST_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/test"
+
+    train_datagen = ImageDataGenerator(
+        rescale=1. / 255,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True)
+
+    test_datagen = ImageDataGenerator(rescale=1./255)
+
+    train_generator = train_datagen.flow_from_directory(
+        TRAIN_DIR_PATH,
+        target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
+        batch_size=BATCH_SIZE,
+        class_mode='binary')  # since we use binary_crossentropy loss, we need binary labels
+
+    # this is a similar generator, for validation data
+    validation_generator = test_datagen.flow_from_directory(
+        TEST_DIR_PATH,
+        target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
+        batch_size=BATCH_SIZE,
+        class_mode='binary')
+
+    model = get_model(2)
+
+    plot_model(model, to_file='model.png')
+
+    # Get and train the top layers.
+    model = get_top_layer_model(model)
+    model.fit_generator(
+        train_generator,
+        steps_per_epoch=STEPS_PER_EPOCH,
+        validation_data=validation_generator,
+        validation_steps=VALIDATION_STEPS,
+        epochs=10,
+        callbacks=None)
+
+    # Get and train the mid layers.
+    model = get_mid_layer_model(model)
+    model.fit_generator(
+        train_generator,
+        steps_per_epoch=STEPS_PER_EPOCH,
+        validation_data=validation_generator,
+        validation_steps=VALIDATION_STEPS,
+        epochs=100,
+        callbacks=[checkpointer, early_stopper, tensorboard])
+
+    # save model
+    model.save('./output/model.hdf5', overwrite=True)
