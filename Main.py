@@ -19,7 +19,7 @@ from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import (ImageDataGenerator, Iterator,
                                        array_to_img, img_to_array, load_img)
 from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
-from keras.utils import plot_model
+#from keras.utils import plot_model
 
 RANDOM_SEED = 0
 MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
@@ -540,18 +540,18 @@ if __name__ == '__main__':
         TRAIN_DIR_PATH,
         target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
         batch_size=BATCH_SIZE,
-        class_mode='binary')  # since we use binary_crossentropy loss, we need binary labels
+        class_mode='categorical')  # since we use binary_crossentropy loss, we need binary labels
 
     # this is a similar generator, for validation data
     validation_generator = test_datagen.flow_from_directory(
         TEST_DIR_PATH,
         target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
         batch_size=BATCH_SIZE,
-        class_mode='binary')
+        class_mode='categorical')
 
     model = get_model(2)
 
-    plot_model(model, to_file='model.png')
+    #plot_model(model, to_file='model.png')
 
     # Get and train the top layers.
     model = get_top_layer_model(model)
