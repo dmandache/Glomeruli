@@ -1,19 +1,5 @@
 from keras import backend as K
-import numpy as np
 
-'''
-from sklearn import metrics
-
-def f1(y_true, y_pred):
-    return metrics.f1_score(y_true, y_pred)
-
-class MyF1Metric(K.callbacks.Callback):
-    def on_epoch_end(self, batch, logs={}):
-        y_pred = np.asarray(self.model.predict(self.validation_data[0]))
-        y_true = self.validation_data[1]
-        self.f1s = metrics.f1_score(y_true, y_pred)
-        return
-'''
 
 def f1_score(y_true, y_pred):
 

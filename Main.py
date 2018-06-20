@@ -11,14 +11,7 @@ from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import ImageDataGenerator
 from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
 
-from MyMetrics import f1_score
-
-from sklearn import metrics
-
-def f1(y_true, y_pred):
-    print(y_true, flush=True)
-    print(y_pred, flush=True)
-    return metrics.f1_score(y_true, y_pred)
+from MyMetrics import precision, recall, f1_score
 
 # we chose to train the top 2 inception blocks
 BATCH_SIZE = 100
@@ -80,7 +73,7 @@ def get_top_layer_model(model):
 
     # compile the model (should be done after setting layers to non-trainable)
     model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
-                  metrics=['accuracy',f1_score])
+                  metrics=['accuracy', precision, recall, f1_score])
 
     return model
 
@@ -97,7 +90,7 @@ def get_mid_layer_model(model):
     # we use SGD with a low learning rate
     model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
                   loss='categorical_crossentropy',
-                  metrics=['accuracy',f1_score])
+                  metrics=['accuracy', precision, recall, f1_score])
 
     return model
 
@@ -140,8 +133,8 @@ def main(image_dir=None):
     TRAIN_DIR_PATH = IMAGES_DIR_PATH + "/train"
     TEST_DIR_PATH = IMAGES_DIR_PATH + "/test"
 
-    TRAIN_SAMPLES = len(os.listdir(TRAIN_DIR_PATH))
-    TEST_SAMPLES = len(os.listdir(TEST_DIR_PATH))
+    TRAIN_SAMPLES = len(os.listdir(DIR_TRAIN_GLOM)) + len(os.listdir(DIR_TRAIN_NONGLOM))
+    TEST_SAMPLES = len(os.listdir(DIR_TEST_GLOM)) + len(os.listdir(DIR_TEST_NONGLOM))
 
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
