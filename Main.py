@@ -9,12 +9,16 @@ from keras.optimizers import SGD
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import ImageDataGenerator
-from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping
+from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping, History
+
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 
 from MyMetrics import precision, recall, f1_score
 
 # we chose to train the top 2 inception blocks
-BATCH_SIZE = 100
+BATCH_SIZE = 256
 TRAINABLE_LAYERS = 172
 INCEPTIONV3_BASE_LAYERS = len(InceptionV3(weights=None, include_top=False).layers)
 INCEPTIONV3_ALL_LAYERS = len(InceptionV3(weights=None, include_top=True).layers)
@@ -29,6 +33,9 @@ MODEL_INPUT_DEPTH = 3
 
 FC_LAYER_SIZE = 1024
 
+class_weight = {0 : 25,  # 0 : glomeruli
+                1 : 1} # 1 : nonglomeruli
+
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(
     filepath='./output/checkpoints/inception.{epoch:03d}-{val_loss:.2f}.hdf5',
@@ -36,10 +43,13 @@ checkpointer = ModelCheckpoint(
     save_best_only=True)
 
 # Helper: Stop when we stop learning.
-early_stopper = EarlyStopping(patience=10)
+early_stopper = EarlyStopping(patience=100)
 
 # Helper: TensorBoard
 tensorboard = TensorBoard(log_dir='./output/events')
+
+# Helper: Keep track of acc and loss during training
+history = History()
 
 
 def get_model(num_classes, weights='imagenet'):
@@ -88,21 +98,21 @@ def get_mid_layer_model(model):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
+    model.compile(optimizer='adam',
                   loss='categorical_crossentropy',
                   metrics=['accuracy', precision, recall, f1_score])
 
     return model
 
-def main(image_dir=None):
+def main(dir=None):
 
     VALIDATION_SPLIT = 0.2
     DATA_IS_SPLIT = True
 
-    if image_dir == None:
+    if dir == None:
         IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data"
     else:
-        IMAGES_DIR_PATH = image_dir
+        IMAGES_DIR_PATH = dir
 
     os.makedirs('./output/checkpoints/', exist_ok=True)
 
@@ -159,6 +169,7 @@ def main(image_dir=None):
 
     model = get_model(2)
 
+    print("Training dense classifier from scratch")
     # Get and train the top layers.
     model = get_top_layer_model(model)
     model.fit_generator(
@@ -169,6 +180,7 @@ def main(image_dir=None):
         epochs=10,
         callbacks=[])
 
+    print("Fine-tune InceptionV3, bottom layers frozen")
     # Get and train the mid layers.
     model = get_mid_layer_model(model)
     model.fit_generator(
@@ -177,15 +189,25 @@ def main(image_dir=None):
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
         epochs=100,
-        callbacks=[checkpointer, early_stopper, tensorboard])
+        class_weight = class_weight,
+        callbacks=[checkpointer, early_stopper, tensorboard, history])
 
     # save model
     model.save('./output/model.hdf5', overwrite=True)
 
+    plt.plot(history.history['acc'], 'r-', label='Train accuracy')
+    plt.plot(history.history['val_acc'], 'g-', label='Test accuracy')
+    plt.plot(history.history['loss'], 'r--', label='Train loss')
+    plt.plot(history.history['val_loss'], 'g--', label='Test loss')
+    plt.legend()
+    plt.xlabel('epoch')
+    plt.ylabel('loss/accuracy')
+    plt.savefig('./output/training.png')
+
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--image-dir', help='data directory')
+    parser.add_argument('--dir', help='data directory')
     args = parser.parse_args()
 
     main(**vars(args))
