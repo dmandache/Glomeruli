@@ -15,7 +15,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from MyMetrics import precision, recall, f1_score
+from MyMetrics import precision, recall, f1_score, sensitivity, specificity
+
+NUM_CLASSES = 1
 
 # we chose to train the top 2 inception blocks
 BATCH_SIZE = 256
@@ -65,7 +67,7 @@ def get_model(num_classes, weights='imagenet'):
     # let's add a fully-connected layer
     x = Dense(FC_LAYER_SIZE, activation='relu')(x)
     # and a logistic layer -- let's say we have 2 classes
-    predictions = Dense(num_classes, activation='softmax')(x)
+    predictions = Dense(num_classes, activation='sigmoid')(x)
 
     # this is the model we will train
     model = Model(inputs=[base_model.input], outputs=[predictions])
@@ -82,8 +84,8 @@ def get_top_layer_model(model):
         layer.trainable = True
 
     # compile the model (should be done after setting layers to non-trainable)
-    model.compile(optimizer='rmsprop', loss='categorical_crossentropy',
-                  metrics=['accuracy', precision, recall, f1_score])
+    model.compile(optimizer='rmsprop', loss='binary_crossentropy',
+                  metrics=[sensitivity, specificity])
 
     return model
 
@@ -99,8 +101,8 @@ def get_mid_layer_model(model):
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
     model.compile(optimizer='adam',
-                  loss='categorical_crossentropy',
-                  metrics=['accuracy', precision, recall, f1_score])
+                  loss='binary_crossentropy',
+                  metrics=[sensitivity, specificity])
 
     return model
 
@@ -158,16 +160,16 @@ def main(dir=None):
         TRAIN_DIR_PATH,
         target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
         batch_size=BATCH_SIZE,
-        class_mode='categorical')
+        class_mode='binary')
 
     # this is a similar generator, for validation data
     validation_generator = test_datagen.flow_from_directory(
         TEST_DIR_PATH,
         target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
         batch_size=BATCH_SIZE,
-        class_mode='categorical')
+        class_mode='binary')
 
-    model = get_model(2)
+    model = get_model(NUM_CLASSES)
 
     print("Training dense classifier from scratch")
     # Get and train the top layers.
@@ -177,7 +179,7 @@ def main(dir=None):
         steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
-        epochs=10,
+        epochs=1,
         callbacks=[])
 
     print("Fine-tune InceptionV3, bottom layers frozen")
@@ -188,8 +190,8 @@ def main(dir=None):
         steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
-        epochs=100,
-        class_weight = class_weight,
+        epochs=5,
+        class_weight=class_weight,
         callbacks=[checkpointer, early_stopper, tensorboard, history])
 
     # save model
