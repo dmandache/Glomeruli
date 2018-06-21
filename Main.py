@@ -35,8 +35,8 @@ MODEL_INPUT_DEPTH = 3
 
 FC_LAYER_SIZE = 1024
 
-class_weight = {0 : 25,  # 0 : glomeruli
-                1 : 1} # 1 : nonglomeruli
+class_weight = {0 : 1,  # 0 : nonglomeruli
+                1 : 4} # 1 : glomeruli
 
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(
