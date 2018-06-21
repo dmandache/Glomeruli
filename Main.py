@@ -118,10 +118,10 @@ def main(dir=None):
 
     os.makedirs('./output/checkpoints/', exist_ok=True)
 
-    DIR_TRAIN_GLOM = IMAGES_DIR_PATH + "/train/glomeruli"
-    DIR_TEST_GLOM = IMAGES_DIR_PATH + "/test/glomeruli"
-    DIR_TRAIN_NONGLOM = IMAGES_DIR_PATH + "/train/nonglomeruli"
-    DIR_TEST_NONGLOM = IMAGES_DIR_PATH + "/test/nonglomeruli"
+    DIR_TRAIN_GLOM = IMAGES_DIR_PATH + "/train/01_glomeruli"
+    DIR_TEST_GLOM = IMAGES_DIR_PATH + "/test/01_glomeruli"
+    DIR_TRAIN_NONGLOM = IMAGES_DIR_PATH + "/train/00_nonglomeruli"
+    DIR_TEST_NONGLOM = IMAGES_DIR_PATH + "/test/00_nonglomeruli"
 
     if DATA_IS_SPLIT:
         pass
