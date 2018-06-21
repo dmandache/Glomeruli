@@ -84,7 +84,7 @@ def get_top_layer_model(model):
         layer.trainable = True
 
     # compile the model (should be done after setting layers to non-trainable)
-    model.compile(optimizer='rmsprop', loss='binary_crossentropy',
+    model.compile(optimizer='adam', loss='binary_crossentropy',
                   metrics=[sensitivity, specificity])
 
     return model
@@ -179,7 +179,7 @@ def main(dir=None):
         steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
-        epochs=1,
+        epochs=20,
         class_weight=class_weight,
         callbacks=[])
 
@@ -191,7 +191,7 @@ def main(dir=None):
         steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
-        epochs=5,
+        epochs=200,
         class_weight=class_weight,
         callbacks=[checkpointer, early_stopper, tensorboard, history])
 
