@@ -35,8 +35,8 @@ MODEL_INPUT_DEPTH = 3
 
 FC_LAYER_SIZE = 1024
 
-class_weight = {0 : 1,  # 0 : nonglomeruli
-                1 : 4} # 1 : glomeruli
+class_weight = {0 : 0.1,    # 0 : nonglomeruli
+                1 : 0.9}    # 1 : glomeruli
 
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(
@@ -180,6 +180,7 @@ def main(dir=None):
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
         epochs=1,
+        class_weight=class_weight,
         callbacks=[])
 
     print("Fine-tune InceptionV3, bottom layers frozen")
@@ -197,14 +198,12 @@ def main(dir=None):
     # save model
     model.save('./output/model.hdf5', overwrite=True)
 
-    plt.plot(history.history['acc'], 'r-', label='Train accuracy')
-    plt.plot(history.history['val_acc'], 'g-', label='Test accuracy')
     plt.plot(history.history['loss'], 'r--', label='Train loss')
     plt.plot(history.history['val_loss'], 'g--', label='Test loss')
     plt.legend()
     plt.xlabel('epoch')
-    plt.ylabel('loss/accuracy')
-    plt.savefig('./output/training.png')
+    plt.ylabel('loss')
+    plt.savefig('./output/training_plot.png')
 
 if __name__ == '__main__':
 
