@@ -25,10 +25,6 @@ TRAINABLE_LAYERS = 172
 INCEPTIONV3_BASE_LAYERS = len(InceptionV3(weights=None, include_top=False).layers)
 INCEPTIONV3_ALL_LAYERS = len(InceptionV3(weights=None, include_top=True).layers)
 
-
-STEPS_PER_EPOCH = 625   # or TRAIN_SAMPLES//BATCH_SIZE
-VALIDATION_STEPS = 100  # or TEST_SAMPLES//BATCH_SIZE
-
 MODEL_INPUT_WIDTH = 299
 MODEL_INPUT_HEIGHT = 299
 MODEL_INPUT_DEPTH = 3
@@ -36,7 +32,7 @@ MODEL_INPUT_DEPTH = 3
 FC_LAYER_SIZE = 1024
 
 class_weight = {0 : 1,    # 0 : nonglomeruli
-                1 : 5}    # 1 : glomeruli
+                1 : 25}    # 1 : glomeruli
 
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(
