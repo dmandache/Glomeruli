@@ -35,7 +35,6 @@ def get_n_samples(n=32, dir=None, target_size=(299,299)):
 
     samples = np.stack(samples, axis=0)
     #samples = np.expand_dims(samples, axis=3)
-    img_new
     return samples
 
 def plot_to_grid(batch, name='images', grid_size=7, random=False):
@@ -101,8 +100,9 @@ def main(dir=None):
     plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
 
     y_test_glom = model.predict(x_test_glom)
-    print(y_test_glom)
+    print(np.around(y_test_glom, decimals=4))
     y_test_nonglom = model.predict(x_test_nonglom)
+    print(np.around(y_test_nonglom, decimals=4))
 
 
 if __name__ == '__main__':
