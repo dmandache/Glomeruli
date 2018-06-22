@@ -111,12 +111,16 @@ def get_mid_layer_model(model):
 
 def main(dir=None):
 
+    global IMAGES_DIR_PATH
+    global DIR_TRAIN_GLOM
+    global DIR_TEST_GLOM
+    global DIR_TRAIN_NONGLOM
+    global DIR_TEST_NONGLOM
+
     VALIDATION_SPLIT = 0.2
     DATA_IS_SPLIT = True
 
-    if dir == None:
-        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data"
-    else:
+    if dir is not None:
         IMAGES_DIR_PATH = dir
 
     os.makedirs('./output/checkpoints/', exist_ok=True)
