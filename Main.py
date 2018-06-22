@@ -4,6 +4,7 @@ import shutil
 import argparse
 
 import numpy as np
+import pickle
 from keras.models import Model
 from keras.optimizers import SGD
 from keras.layers import Dense, GlobalAveragePooling2D
@@ -15,7 +16,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from MyMetrics import precision, recall, f1_score, sensitivity, specificity
+from MyMetrics import *
+from Globals import *
+
 
 NUM_CLASSES = 1
 
@@ -45,7 +48,7 @@ checkpointer = ModelCheckpoint(
     save_best_only=True)
 
 # Helper: Stop when we stop learning.
-early_stopper = EarlyStopping(patience=100)
+early_stopper = EarlyStopping(patience=20)
 
 # Helper: TensorBoard
 tensorboard = TensorBoard(log_dir='./output/events')
@@ -85,7 +88,7 @@ def get_top_layer_model(model):
 
     # compile the model (should be done after setting layers to non-trainable)
     model.compile(optimizer='adam', loss='binary_crossentropy',
-                  metrics=[sensitivity, specificity])
+                  metrics=['accuracy', sensitivity, specificity])
 
     return model
 
@@ -100,9 +103,9 @@ def get_mid_layer_model(model):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    model.compile(optimizer='adam',
+    model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
                   loss='binary_crossentropy',
-                  metrics=[sensitivity, specificity])
+                  metrics=['accuracy', sensitivity, specificity])
 
     return model
 
@@ -179,7 +182,7 @@ def main(dir=None):
         steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
-        epochs=20,
+        epochs=5,
         class_weight=class_weight,
         callbacks=[])
 
@@ -191,12 +194,15 @@ def main(dir=None):
         steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
-        epochs=200,
+        epochs=100,
         class_weight=class_weight,
         callbacks=[checkpointer, early_stopper, tensorboard, history])
 
     # save model
     model.save('./output/model.hdf5', overwrite=True)
+
+    with open('./output/trainHistoryDict.p', 'wb') as file_pi:
+        pickle.dump(history.history, file_pi)
 
     plt.plot(history.history['loss'], 'r--', label='Train loss')
     plt.plot(history.history['val_loss'], 'g--', label='Test loss')
@@ -204,6 +210,7 @@ def main(dir=None):
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot.png')
+
 
 if __name__ == '__main__':
 
