@@ -4,7 +4,6 @@ import shutil
 import argparse
 
 import numpy as np
-import pickle
 from keras.models import Model
 from keras.optimizers import SGD
 from keras.layers import Dense, GlobalAveragePooling2D
@@ -16,9 +15,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from MyMetrics import *
-from Globals import *
-
+from MyMetrics import precision, recall, f1_score, sensitivity, specificity
 
 NUM_CLASSES = 1
 
@@ -48,7 +45,7 @@ checkpointer = ModelCheckpoint(
     save_best_only=True)
 
 # Helper: Stop when we stop learning.
-early_stopper = EarlyStopping(patience=20)
+early_stopper = EarlyStopping(patience=100)
 
 # Helper: TensorBoard
 tensorboard = TensorBoard(log_dir='./output/events')
@@ -111,19 +108,13 @@ def get_mid_layer_model(model):
 
 def main(dir=None):
 
-    global IMAGES_DIR_PATH
-    global DIR_TRAIN_GLOM
-    global DIR_TEST_GLOM
-    global DIR_TRAIN_NONGLOM
-    global DIR_TEST_NONGLOM
-
     VALIDATION_SPLIT = 0.2
     DATA_IS_SPLIT = True
 
-    if dir is not None:
+    if dir == None:
+        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data"
+    else:
         IMAGES_DIR_PATH = dir
-
-    os.makedirs('./output/checkpoints/', exist_ok=True)
 
     DIR_TRAIN_GLOM = IMAGES_DIR_PATH + "/train/01_glomeruli"
     DIR_TEST_GLOM = IMAGES_DIR_PATH + "/test/01_glomeruli"
@@ -154,6 +145,8 @@ def main(dir=None):
 
     TRAIN_SAMPLES = len(os.listdir(DIR_TRAIN_GLOM)) + len(os.listdir(DIR_TRAIN_NONGLOM))
     TEST_SAMPLES = len(os.listdir(DIR_TEST_GLOM)) + len(os.listdir(DIR_TEST_NONGLOM))
+
+    os.makedirs('./output/checkpoints/', exist_ok=True)
 
     train_datagen = ImageDataGenerator(
         rescale=1. / 255,
@@ -205,16 +198,12 @@ def main(dir=None):
     # save model
     model.save('./output/model.hdf5', overwrite=True)
 
-    with open('./output/trainHistoryDict.p', 'wb') as file_pi:
-        pickle.dump(history.history, file_pi)
-
     plt.plot(history.history['loss'], 'r--', label='Train loss')
     plt.plot(history.history['val_loss'], 'g--', label='Test loss')
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot.png')
-
 
 if __name__ == '__main__':
 
