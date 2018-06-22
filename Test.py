@@ -35,7 +35,7 @@ def get_n_samples(n=32, dir=None, target_size=(299,299)):
 
     samples = np.stack(samples, axis=0)
     #samples = np.expand_dims(samples, axis=3)
-
+    img_new
     return samples
 
 def plot_to_grid(batch, name='images', grid_size=7, random=False):
@@ -102,7 +102,7 @@ def main(dir=None):
 
     y_test_glom = model.predict(x_test_glom)
     print(y_test_glom)
-    #y_test_nonglom = model.predict(x_test_nonglom)
+    y_test_nonglom = model.predict(x_test_nonglom)
 
 
 if __name__ == '__main__':
