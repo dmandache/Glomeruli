@@ -205,44 +205,51 @@ class ImageListIterator(Iterator):
         # The transformation of images is not under thread lock
         # so it can be done in parallel
 
-        batch_x = np.zeros((current_batch_size,) + self.image_shape,
-                           dtype=K.floatx())
+        return self._get_batches_of_transformed_samples(index_array)
+
+    def _get_batches_of_transformed_samples(self, index_array):
+        batch_x = np.zeros(
+            (len(index_array),) + self.image_shape,
+            dtype=K.floatx())
         grayscale = self.color_mode == 'grayscale'
         # build batch of image data
         for i, j in enumerate(index_array):
-            img = load_img(self.filenames[j],
+            fname = self.filenames[j]
+            img = load_img(os.path.join(self.directory, fname),
                            grayscale=grayscale,
-                           target_size=self.target_size)
+                           target_size=self.target_size,
+                           interpolation=self.interpolation)
             x = img_to_array(img, data_format=self.data_format)
-            x = self.image_data_generator.random_transform(x)
+            params = self.image_data_generator.get_random_transform(x.shape)
+            x = self.image_data_generator.apply_transform(x, params)
             x = self.image_data_generator.standardize(x)
             batch_x[i] = x
         # optionally save augmented images to disk for debugging purposes
         if self.save_to_dir:
-            for i in range(current_batch_size):
+            for i, j in enumerate(index_array):
                 img = array_to_img(batch_x[i], self.data_format, scale=True)
                 fname = '{prefix}_{index}_{hash}.{format}'.format(
                     prefix=self.save_prefix,
-                    index=current_index + i,
-                    hash=np.random.randint(10000),
+                    index=j,
+                    hash=np.random.randint(1e7),
                     format=self.save_format)
                 img.save(os.path.join(self.save_to_dir, fname))
         # build batch of labels
-        if self.class_mode == 'sparse':
+        if self.class_mode == 'input':
+            batch_y = batch_x.copy()
+        elif self.class_mode == 'sparse':
             batch_y = self.classes[index_array]
         elif self.class_mode == 'binary':
-            batch_y = self.classes[index_array].astype(K.floatx())
+            batch_y = self.classes[index_array].astype(backend.floatx())
         elif self.class_mode == 'categorical':
-            batch_y = np.zeros((len(batch_x), self.num_class),
-                               dtype=K.floatx())
+            batch_y = np.zeros(
+                (len(batch_x), self.num_classes),
+                dtype=K.floatx())
             for i, label in enumerate(self.classes[index_array]):
                 batch_y[i, label] = 1.
         else:
             return batch_x
         return batch_x, batch_y
-
-    def _get_batches_of_transformed_samples(self, index_array):
-        pass
 
 # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/image_retraining/retrain.py
 def create_image_lists(image_dir, validation_pct=10):
