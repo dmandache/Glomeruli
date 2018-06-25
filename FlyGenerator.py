@@ -214,11 +214,9 @@ class ImageListIterator(Iterator):
         grayscale = self.color_mode == 'grayscale'
         # build batch of image data
         for i, j in enumerate(index_array):
-            fname = self.filenames[j]
-            img = load_img(os.path.join(self.directory, fname),
+            img = load_img(self.filenames[j],
                            grayscale=grayscale,
-                           target_size=self.target_size,
-                           interpolation=self.interpolation)
+                           target_size=self.target_size)
             x = img_to_array(img, data_format=self.data_format)
             params = self.image_data_generator.get_random_transform(x.shape)
             x = self.image_data_generator.apply_transform(x, params)
