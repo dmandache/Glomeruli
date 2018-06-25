@@ -38,8 +38,8 @@ MODEL_INPUT_DEPTH = 3
 
 FC_LAYER_SIZE = 1024
 
-class_weight = {'nonglomeruli': 1,    # 0 :
-                'glomeruli': 25}      # 1 :
+class_weight = {0: 1,    # 0 : 1
+                1: 1}      # 1 : 25
 
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(
@@ -213,7 +213,7 @@ def main(dir=None, split=None):
         IMAGES_DIR_PATH = dir
 
     if split == None:
-        VALIDATION_SPLIT = 20
+        VALIDATION_SPLIT = 10
     else:
         VALIDATION_SPLIT = split
 
@@ -229,7 +229,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=3,
+        epochs=100,
         class_weight=class_weight,
         callbacks=[])
 
@@ -241,7 +241,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=20,
+        epochs=1000,
         class_weight=class_weight,
         callbacks=[checkpointer, tensorboard, history])
 
