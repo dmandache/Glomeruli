@@ -204,6 +204,7 @@ class ImageListIterator(Iterator):
                 self.index_generator)
         # The transformation of images is not under thread lock
         # so it can be done in parallel
+
         batch_x = np.zeros((current_batch_size,) + self.image_shape,
                            dtype=K.floatx())
         grayscale = self.color_mode == 'grayscale'
@@ -240,6 +241,8 @@ class ImageListIterator(Iterator):
             return batch_x
         return batch_x, batch_y
 
+    def _get_batches_of_transformed_samples(self, index_array):
+        pass
 
 # https://github.com/tensorflow/tensorflow/blob/master/tensorflow/examples/image_retraining/retrain.py
 def create_image_lists(image_dir, validation_pct=10):

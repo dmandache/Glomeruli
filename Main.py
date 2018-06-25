@@ -21,6 +21,7 @@ import MyMetrics
 import FlyGenerator
 import Test
 
+
 NUM_CLASSES = 1
 RANDOM_SEED = 8796
 CLASS_MODE = 'binary'
@@ -48,7 +49,7 @@ checkpointer = ModelCheckpoint(
 
 # Helper: Stop when we stop learning.
 early_stopper = EarlyStopping(patience=100)
-
+444
 # Helper: TensorBoard
 tensorboard = TensorBoard(log_dir='./output/events')
 
@@ -113,10 +114,6 @@ def get_generators(image_dir, validation_pct=None):
 
     train_data_gen_args = dict(
                             rescale=1. / 255,
-                            rotation_range=90.,
-                            width_shift_range=0.1,
-                            height_shift_range=0.1,
-                            zoom_range=0.2,
                             horizontal_flip=True)
 
     test_data_gen_args = dict(rescale=1. / 255)
