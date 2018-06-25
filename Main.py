@@ -4,6 +4,8 @@ import shutil
 import argparse
 
 import numpy as np
+from pandas import  DataFrame
+
 from keras.models import Model
 from keras.optimizers import SGD
 from keras.layers import Dense, GlobalAveragePooling2D
@@ -16,6 +18,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from MyMetrics import precision, recall, f1_score, sensitivity, specificity
+import Test
 
 NUM_CLASSES = 1
 
@@ -175,7 +178,7 @@ def main(dir=None):
         steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
-        epochs=5,
+        epochs=3,
         class_weight=class_weight,
         callbacks=[])
 
@@ -187,12 +190,14 @@ def main(dir=None):
         steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=TEST_SAMPLES//BATCH_SIZE,
-        epochs=100,
+        epochs=20,
         class_weight=class_weight,
-        callbacks=[checkpointer, early_stopper, tensorboard, history])
+        callbacks=[checkpointer, tensorboard, history])
 
     # save model
     model.save('./output/model.hdf5', overwrite=True)
+
+    DataFrame(history).to_csv("./output/history.csv")
 
     plt.plot(history.history['loss'], 'r--', label='Train loss')
     plt.plot(history.history['val_loss'], 'g--', label='Test loss')
@@ -200,6 +205,8 @@ def main(dir=None):
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot.png')
+
+    Test.main(dir=IMAGES_DIR_PATH,n=50)
 
 if __name__ == '__main__':
 

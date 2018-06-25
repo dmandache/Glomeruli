@@ -27,7 +27,7 @@ def get_n_samples(n=32, dir=None, target_size=(299,299)):
             i = i-1
             continue
         if target_size is not 'original':
-            img_new = Image.Image.resize(img,target_size, resample=Image.BICUBIC)
+            img_new = Image.Image.resize(img,target_size)
         else: img_new = img
         x = np.asarray(img_new, dtype='float32')
         x /= 255
@@ -44,8 +44,8 @@ def plot_to_grid(batch, name='images', grid_size=7, random=False):
         ch =  batch[0].shape[2]
     except:
         ch = 1
-    nt = len(batch)
-    n = grid_size * grid_size  # display n random patches
+    nt = len(batch)            # nt = total number of images
+    n = grid_size * grid_size  # n = images displayed (based on grid size)
 
     if n <= nt:
         if random:
@@ -78,11 +78,16 @@ def plot_to_grid(batch, name='images', grid_size=7, random=False):
     imsave('./output/%s.png' % name, stitched_images)
 
 
-def main(dir=None):
-    if dir == None:
+def main(dir=None, n=None):
+    if dir is None:
         IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data"
     else:
         IMAGES_DIR_PATH = dir
+
+    if n is None:
+        NB_SAMPLES = 50
+    else:
+        NB_SAMPLES = n
 
     DIR_TRAIN_GLOM = IMAGES_DIR_PATH + "/train/01_glomeruli"
     DIR_TEST_GLOM = IMAGES_DIR_PATH + "/test/01_glomeruli"
@@ -108,8 +113,8 @@ def main(dir=None):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
-    NB_SAMPLES = 50
     parser.add_argument('--dir', help='data directory')
+    parser.add_argument('--n', help='number of samples')
     args = parser.parse_args()
 
     main(**vars(args))
