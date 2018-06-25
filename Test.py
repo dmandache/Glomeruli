@@ -105,9 +105,11 @@ def main(dir=None, n=None):
     plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
 
     y_test_glom = model.predict(x_test_glom)
-    print(np.around(y_test_glom, decimals=4))
+    print('Those should be all ones - glom 1')
+    print(np.around(y_test_glom, decimals=5))
+    print('Those should be all zeros - nonglom 0')
     y_test_nonglom = model.predict(x_test_nonglom)
-    print(np.around(y_test_nonglom, decimals=4))
+    print(np.around(y_test_nonglom, decimals=5))
 
 
 if __name__ == '__main__':

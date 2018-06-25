@@ -17,10 +17,13 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from MyMetrics import precision, recall, f1_score, sensitivity, specificity
+import MyMetrics
+import FlyGenerator
 import Test
 
 NUM_CLASSES = 1
+RANDOM_SEED = 8796
+CLASS_MODE = 'binary'
 
 # we chose to train the top 2 inception blocks
 BATCH_SIZE = 256
@@ -84,7 +87,7 @@ def get_top_layer_model(model):
 
     # compile the model (should be done after setting layers to non-trainable)
     model.compile(optimizer='adam', loss='binary_crossentropy',
-                  metrics=['accuracy', sensitivity, specificity])
+                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity])
 
     return model
 
@@ -101,83 +104,132 @@ def get_mid_layer_model(model):
     # we use SGD with a low learning rate
     model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
                   loss='binary_crossentropy',
-                  metrics=['accuracy', sensitivity, specificity])
+                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity])
 
     return model
 
-def main(dir=None):
 
-    VALIDATION_SPLIT = 0.2
-    DATA_IS_SPLIT = True
+def get_generators(image_dir, validation_pct=None):
 
-    if dir == None:
-        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data"
+    train_data_gen_args = dict(
+                            rescale=1. / 255,
+                            rotation_range=90.,
+                            width_shift_range=0.1,
+                            height_shift_range=0.1,
+                            zoom_range=0.2,
+                            horizontal_flip=True)
+
+    test_data_gen_args = dict(rescale=1. / 255)
+
+    if validation_pct is None:
+        DIR_TRAIN_GLOM = image_dir + "/train/01_glomeruli"
+        DIR_TEST_GLOM = image_dir + "/test/01_glomeruli"
+        DIR_TRAIN_NONGLOM = image_dir + "/train/00_nonglomeruli"
+        DIR_TEST_NONGLOM = image_dir + "/test/00_nonglomeruli"
+
+        '''
+        if DATA_IS_SPLIT:
+            pass
+        else:  # Split data into train and validation
+            files_glom = os.listdir(DIR_TRAIN_GLOM)
+            files_nonglom = os.listdir(DIR_TRAIN_NONGLOM)
+    
+            for f in files_glom:
+                if np.random.rand(1) < VALIDATION_SPLIT:
+                    shutil.move(DIR_TRAIN_GLOM + '/' + f, DIR_TEST_GLOM + '/' + f)
+    
+            for i in files_nonglom:
+                if np.random.rand(1) < VALIDATION_SPLIT:
+                    shutil.move(DIR_TRAIN_NONGLOM + '/' + i, DIR_TEST_NONGLOM + '/' + i)
+        '''
+
+        print('Trainset\tglomeruli:\t' + str(len(os.listdir(DIR_TRAIN_GLOM))))
+        print('\t\tnon-glomeruli:\t' + str(len(os.listdir(DIR_TRAIN_NONGLOM))))
+        print('Testset\tglomeruli:\t' + str(len(os.listdir(DIR_TEST_GLOM))))
+        print('\t\tnon-glomeruli:\t' + str(len(os.listdir(DIR_TEST_NONGLOM))))
+
+        TRAIN_DIR_PATH = image_dir + "/train"
+        TEST_DIR_PATH = image_dir + "/test"
+
+        NUM_TRAIN_SAMPLES = len(os.listdir(DIR_TRAIN_GLOM)) + len(os.listdir(DIR_TRAIN_NONGLOM))
+        NUM_TEST_SAMPLES = len(os.listdir(DIR_TEST_GLOM)) + len(os.listdir(DIR_TEST_NONGLOM))
+
+        train_datagen = ImageDataGenerator(**train_data_gen_args)
+
+        test_datagen = ImageDataGenerator(**test_data_gen_args)
+
+        train_generator = train_datagen.flow_from_directory(
+            TRAIN_DIR_PATH,
+            target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
+            batch_size=BATCH_SIZE,
+            class_mode=CLASS_MODE)
+
+        # this is a similar generator, for validation data
+        validation_generator = test_datagen.flow_from_directory(
+            TEST_DIR_PATH,
+            target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
+            batch_size=BATCH_SIZE,
+            class_mode=CLASS_MODE)
     else:
-        IMAGES_DIR_PATH = dir
 
-    DIR_TRAIN_GLOM = IMAGES_DIR_PATH + "/train/01_glomeruli"
-    DIR_TEST_GLOM = IMAGES_DIR_PATH + "/test/01_glomeruli"
-    DIR_TRAIN_NONGLOM = IMAGES_DIR_PATH + "/train/00_nonglomeruli"
-    DIR_TEST_NONGLOM = IMAGES_DIR_PATH + "/test/00_nonglomeruli"
+        image_lists = FlyGenerator.create_image_lists(image_dir, validation_pct)
 
-    if DATA_IS_SPLIT:
-        pass
-    else:  # Split data into train and validation
-        files_glom = os.listdir(DIR_TRAIN_GLOM)
-        files_nonglom = os.listdir(DIR_TRAIN_NONGLOM)
+        classes = list(image_lists.keys())
+        num_classes = len(classes)
 
-        for f in files_glom:
-            if np.random.rand(1) < VALIDATION_SPLIT:
-                shutil.move(DIR_TRAIN_GLOM + '/' + f, DIR_TEST_GLOM + '/' + f)
+        NUM_TRAIN_SAMPLES = len(image_lists[classes[0]]['training']) + len(image_lists[classes[1]]['training'])
+        NUM_TEST_SAMPLES = len(image_lists[classes[0]]['validation']) + len(image_lists[classes[1]]['validation'])
 
-        for i in files_nonglom:
-            if np.random.rand(1) < VALIDATION_SPLIT:
-                shutil.move(DIR_TRAIN_NONGLOM + '/' + i, DIR_TEST_NONGLOM + '/' + i)
+        train_datagen = FlyGenerator.CustomImageDataGenerator(**train_data_gen_args)
 
-    print('Trainset\tglomeruli:\t' + str(len(os.listdir(DIR_TRAIN_GLOM))))
-    print('\t\tnon-glomeruli:\t' + str(len(os.listdir(DIR_TRAIN_NONGLOM))))
-    print('Testset\tglomeruli:\t' + str(len(os.listdir(DIR_TEST_GLOM))))
-    print('\t\tnon-glomeruli:\t' + str(len(os.listdir(DIR_TEST_NONGLOM))))
+        test_datagen = FlyGenerator.CustomImageDataGenerator(**test_data_gen_args)
 
-    TRAIN_DIR_PATH = IMAGES_DIR_PATH + "/train"
-    TEST_DIR_PATH = IMAGES_DIR_PATH + "/test"
+        train_generator = train_datagen.flow_from_image_lists(
+            image_lists=image_lists,
+            category='training',
+            image_dir=image_dir,
+            target_size=(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH),
+            batch_size=BATCH_SIZE,
+            class_mode=CLASS_MODE,
+            seed=RANDOM_SEED)
 
-    TRAIN_SAMPLES = len(os.listdir(DIR_TRAIN_GLOM)) + len(os.listdir(DIR_TRAIN_NONGLOM))
-    TEST_SAMPLES = len(os.listdir(DIR_TEST_GLOM)) + len(os.listdir(DIR_TEST_NONGLOM))
+        validation_generator = test_datagen.flow_from_image_lists(
+            image_lists=image_lists,
+            category='validation',
+            image_dir=image_dir,
+            target_size=(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH),
+            batch_size=BATCH_SIZE,
+            class_mode=CLASS_MODE,
+            seed=RANDOM_SEED)
+
+    return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
+
+def main(dir=None, split=None):
 
     os.makedirs('./output/checkpoints/', exist_ok=True)
 
-    train_datagen = ImageDataGenerator(
-        rescale=1. / 255,
-        shear_range=0.2,
-        zoom_range=0.2,
-        horizontal_flip=True)
+    if dir == None:
+        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/train"
+    else:
+        IMAGES_DIR_PATH = dir
 
-    test_datagen = ImageDataGenerator(rescale=1. / 255)
-
-    train_generator = train_datagen.flow_from_directory(
-        TRAIN_DIR_PATH,
-        target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
-        batch_size=BATCH_SIZE,
-        class_mode='binary')
-
-    # this is a similar generator, for validation data
-    validation_generator = test_datagen.flow_from_directory(
-        TEST_DIR_PATH,
-        target_size=(MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT),
-        batch_size=BATCH_SIZE,
-        class_mode='binary')
+    if split == None:
+        VALIDATION_SPLIT = 20
+    else:
+        VALIDATION_SPLIT = split
 
     model = get_model(NUM_CLASSES)
+
+    train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES = get_generators(IMAGES_DIR_PATH, VALIDATION_SPLIT)
 
     print("Training dense classifier from scratch")
     # Get and train the top layers.
     model = get_top_layer_model(model)
     model.fit_generator(
         train_generator,
-        steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
+        steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
-        validation_steps=TEST_SAMPLES//BATCH_SIZE,
+        validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
         epochs=3,
         class_weight=class_weight,
         callbacks=[])
@@ -187,9 +239,9 @@ def main(dir=None):
     model = get_mid_layer_model(model)
     model.fit_generator(
         train_generator,
-        steps_per_epoch=TRAIN_SAMPLES//BATCH_SIZE,
+        steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
-        validation_steps=TEST_SAMPLES//BATCH_SIZE,
+        validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
         epochs=20,
         class_weight=class_weight,
         callbacks=[checkpointer, tensorboard, history])
@@ -197,6 +249,10 @@ def main(dir=None):
     # save model
     model.save('./output/model.hdf5', overwrite=True)
 
+    # save metrics during training epochs
+    pd.DataFrame(history.history).to_csv("./output/history.csv")
+
+    # plot  metrics during training epochs
     plt.plot(history.history['loss'], 'r--', label='Train loss')
     plt.plot(history.history['val_loss'], 'g--', label='Test loss')
     plt.legend()
@@ -206,12 +262,12 @@ def main(dir=None):
 
     Test.main(dir=IMAGES_DIR_PATH,n=50)
 
-    pd.DataFrame(history.history).to_csv("./output/history.csv")
 
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dir', help='data directory')
+    parser.add_argument('--split', help='percentage of validation data')
     args = parser.parse_args()
 
     main(**vars(args))

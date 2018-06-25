@@ -15,6 +15,40 @@ MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
 VALID_IMAGE_FORMATS = frozenset(['jpg', 'jpeg', 'JPG', 'JPEG', 'png', 'PNG'])
 
 
+'''
+    #   Usage :
+
+image_lists = create_image_lists(image_dir, validation_pct)
+
+generators = get_generators(image_lists, image_dir)
+
+def get_generators(image_lists, image_dir):
+    train_datagen = CustomImageDataGenerator(rescale=1. / 255,
+                                             horizontal_flip=True)
+
+    test_datagen = CustomImageDataGenerator(rescale=1. / 255)
+
+    train_generator = train_datagen.flow_from_image_lists(
+        image_lists=image_lists,
+        category='training',
+        image_dir=image_dir,
+        target_size=(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH),
+        batch_size=BATCH_SIZE,
+        class_mode='categorical',
+        seed=RANDOM_SEED)
+
+    validation_generator = test_datagen.flow_from_image_lists(
+        image_lists=image_lists,
+        category='validation',
+        image_dir=image_dir,
+        target_size=(MODEL_INPUT_HEIGHT, MODEL_INPUT_WIDTH),
+        batch_size=BATCH_SIZE,
+        class_mode='categorical',
+        seed=RANDOM_SEED)
+
+    return train_generator, validation_generator
+    
+'''
 def as_bytes(bytes_or_text, encoding='utf-8'):
     """Converts bytes or unicode to `bytes`, using utf-8 encoding for text.
 
