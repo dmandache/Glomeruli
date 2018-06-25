@@ -238,7 +238,7 @@ class ImageListIterator(Iterator):
         elif self.class_mode == 'sparse':
             batch_y = self.classes[index_array]
         elif self.class_mode == 'binary':
-            batch_y = self.classes[index_array].astype(backend.floatx())
+            batch_y = self.classes[index_array].astype(K.floatx())
         elif self.class_mode == 'categorical':
             batch_y = np.zeros(
                 (len(batch_x), self.num_classes),
