@@ -4,7 +4,7 @@ import shutil
 import argparse
 
 import numpy as np
-from pandas import  DataFrame
+import pandas as pd
 
 from keras.models import Model
 from keras.optimizers import SGD
@@ -197,8 +197,6 @@ def main(dir=None):
     # save model
     model.save('./output/model.hdf5', overwrite=True)
 
-    DataFrame(history).to_csv("./output/history.csv")
-
     plt.plot(history.history['loss'], 'r--', label='Train loss')
     plt.plot(history.history['val_loss'], 'g--', label='Test loss')
     plt.legend()
@@ -207,6 +205,8 @@ def main(dir=None):
     plt.savefig('./output/training_plot.png')
 
     Test.main(dir=IMAGES_DIR_PATH,n=50)
+
+    pd.DataFrame(history.history).to_csv("./output/history.csv")
 
 if __name__ == '__main__':
 
