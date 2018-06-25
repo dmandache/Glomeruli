@@ -179,12 +179,9 @@ def get_generators(image_dir, validation_pct=None):
         NUM_TEST_SAMPLES = len(image_lists[classes[0]]['validation']) + len(image_lists[classes[1]]['validation'])
 
         train_datagen = FlyGenerator.CustomImageDataGenerator(**train_data_gen_args)
-        class_dictionary = train_datagen.class_indices
-        print(class_dictionary)
 
         test_datagen = FlyGenerator.CustomImageDataGenerator(**test_data_gen_args)
-        class_dictionary = test_datagen.class_indices
-        print(class_dictionary)
+
 
         train_generator = train_datagen.flow_from_image_lists(
             image_lists=image_lists,
