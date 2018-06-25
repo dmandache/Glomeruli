@@ -38,8 +38,8 @@ MODEL_INPUT_DEPTH = 3
 
 FC_LAYER_SIZE = 1024
 
-class_weight = {0 : 1,    # 0 : nonglomeruli
-                1 : 25}    # 1 : glomeruli
+class_weight = {0 : 25,    # 0 : glomeruli
+                1 : 1}    # 1 : nonglomeruli
 
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(
@@ -172,6 +172,7 @@ def get_generators(image_dir, validation_pct=None):
         image_lists = FlyGenerator.create_image_lists(image_dir, validation_pct)
 
         classes = list(image_lists.keys())
+        print(classes)
         num_classes = len(classes)
 
         NUM_TRAIN_SAMPLES = len(image_lists[classes[0]]['training']) + len(image_lists[classes[1]]['training'])
