@@ -265,8 +265,8 @@ def main(dir=None, split=None):
     pd.DataFrame(history.history).to_csv("./output/history.csv")
 
     # plot  metrics during training epochs
-    plt.plot(history.history['loss'], 'r--', label='Train loss')
-    plt.plot(history.history['val_loss'], 'g--', label='Test loss')
+    plt.plot(history.history['loss'], 'ro-', label='Train loss')
+    plt.plot(history.history['val_loss'], 'go-', label='Test loss')
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
