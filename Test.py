@@ -10,7 +10,7 @@ import _util
 import _vis
 
 
-from  vis.visualization import visualize_activation
+from vis.visualization import visualize_activation
 
 
 def main(dir=None, n=None):
@@ -50,11 +50,11 @@ def main(dir=None, n=None):
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli predicted as %d', y_test_glom[10][0])
-    '''
     for layer in model.layers:
         if "conv" in layer.name:
             _vis.visualize_activation_map(model, layer.name, img_input)
-    
+
+    '''
     # save confusion matrix
     raw_data = {'actual': y_test,
                 'preds': y_pred}
@@ -69,7 +69,7 @@ def main(dir=None, n=None):
     #vis.visualize_class_activation_map(model, img_input, "cam.png")
 
     # save filters
-    _vis.save_conv_filters_to_file(model)
+    #_vis.save_conv_filters_to_file(model)
 
 
 if __name__ == '__main__':

@@ -254,7 +254,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=100,
+        epochs=1000,
         class_weight=class_weight,
         callbacks=[checkpointer, tensorboard, history])
 
@@ -271,6 +271,8 @@ def main(dir=None, split=None):
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot.png')
+
+    Test.main(IMAGES_DIR_PATH)
 
 
 if __name__ == '__main__':
