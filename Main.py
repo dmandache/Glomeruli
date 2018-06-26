@@ -21,7 +21,10 @@ import MyMetrics
 import FlyGenerator
 import Test
 
-classDict = {'nonglomeruli': 0, 'glomeruli': 1}
+class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
+
+class_weight = {class_dict['nonglomeruli']:  1,    # 0 : 1
+                class_dict['glomeruli']:     25}      # 1 : 25
 
 NUM_CLASSES = 1
 RANDOM_SEED = 8796
@@ -38,9 +41,6 @@ MODEL_INPUT_HEIGHT = 299
 MODEL_INPUT_DEPTH = 3
 
 FC_LAYER_SIZE = 1024
-
-class_weight = {classDict['nonglomeruli']:  1,    # 0 : 1
-                classDict['glomeruli']:     25}      # 1 : 25
 
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(
@@ -113,7 +113,7 @@ def get_mid_layer_model(model):
 
 def get_generators(image_dir, validation_pct=None):
 
-    global classDict
+    global class_dict, class_weight
 
     train_data_gen_args = dict(
                             rescale=1. / 255,
@@ -198,10 +198,6 @@ def get_generators(image_dir, validation_pct=None):
             class_mode=CLASS_MODE,
             seed=RANDOM_SEED)
 
-        print(train_generator.id2class)
-
-        classDict = train_generator.id2class
-
         validation_generator = test_datagen.flow_from_image_lists(
             image_lists=image_lists,
             category='validation',
@@ -211,7 +207,10 @@ def get_generators(image_dir, validation_pct=None):
             class_mode=CLASS_MODE,
             seed=RANDOM_SEED)
 
-        print(validation_generator.id2class)
+        class_dict = train_generator.id2class
+        class_weight = {classDict['nonglomeruli']: 1,  # 0 : 1
+                        classDict['glomeruli']: 25}  # 1 : 25
+
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
 
