@@ -1,9 +1,15 @@
 from keras import backend as K
 from scipy.misc import imsave
+from PIL import Image
 import numpy as np
 import math
 
-from util import *
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib import cm
+
+import _util
 
 # util function to convert a tensor into a valid image
 def deprocess_image(x):
@@ -118,7 +124,7 @@ def getFilters(model, layer_name, img_width, img_height, input_img=None):
 
 def save_conv_filters_to_file (model):
     for layer in model.layers:
-        if "convolution" in layer.name:
+        if "conv" in layer.name:
             #print " === ", layer.name, " === ", len(layer.get_weights()), " === ", layer.get_weights()[0].shape
             weights = layer.get_weights()[0]
             weights = weights[:,:,0,:]
@@ -126,7 +132,7 @@ def save_conv_filters_to_file (model):
             filters = []
             for i in range(layer.nb_filter):
                 filters.append(weights[:,:,i])
-            plot_to_grid(filters, layer.name, grid_size=n)
+            _util.plot_to_grid(filters, layer.name, grid_size=n)
 
 
 
@@ -146,7 +152,7 @@ def visualize_activation_map(model,layer_name,img):
     grid_size = math.ceil(math.sqrt(nb_maps))
     feature_maps = activations[0, :, :, :]
     feature_maps_swap = np.swapaxes(feature_maps, 2, 0)
-    plot_to_grid(feature_maps_swap, "feature_map_" + layer_name, grid_size=grid_size)
+    _util.plot_to_grid(feature_maps_swap, "feature_map_" + layer_name, grid_size=grid_size)
     '''
     feature_maps = []
     for i in range(nb_maps):
@@ -156,7 +162,7 @@ def visualize_activation_map(model,layer_name,img):
 
 
 def visualize_class_activation_map(model, img, output_path):
-    width, height, _ = img.shape
+    _, width, height, ch = img.shape
 
     # Get the 512 input weights to the softmax.
     class_weights = model.layers[-2].get_weights()[0]

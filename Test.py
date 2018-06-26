@@ -1,22 +1,17 @@
 from keras.models import load_model
-from keras import backend as K
 from MyMetrics import sensitivity, specificity, f1_score
 
-import os
-import random
 import argparse
 
 import numpy as np
-from PIL import Image
 from scipy.misc import imsave
 
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as plt
-from matplotlib import cm
+import _util
+import _vis
 
-import util
-import vis
+
+from  vis.visualization import visualize_activation
+
 
 def main(dir=None, n=None):
     if dir is None:
@@ -33,16 +28,16 @@ def main(dir=None, n=None):
     DIR_NONGLOM = IMAGES_DIR_PATH + "/nonglomeruli"
 
     # Load some images and preprocess them
-    x_test_glom = util.get_n_samples(NB_SAMPLES, dir=DIR_GLOM, target_size=(299,299))
-    x_test_nonglom = util.get_n_samples(NB_SAMPLES, dir=DIR_NONGLOM, target_size=(299,299))
+    x_test_glom = _util.get_n_samples(NB_SAMPLES, dir=DIR_GLOM, target_size=(299, 299))
+    x_test_nonglom = _util.get_n_samples(NB_SAMPLES, dir=DIR_NONGLOM, target_size=(299, 299))
 
     model = load_model('./output/model.hdf5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
 
     model.summary()
 
-    #util.plot_to_grid(x_test_glom, name='glomeruli_examples', grid_size=7)
+    _util.plot_to_grid(x_test_glom, name='glomeruli_examples', grid_size=7)
 
-    #util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
+    _util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
 
     # print('Those should be all ones - glom 1')
     y_test_glom = model.predict(x_test_glom)
@@ -55,10 +50,11 @@ def main(dir=None, n=None):
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli predicted as %d', y_test_glom[10][0])
+    '''
     for layer in model.layers:
         if "conv" in layer.name:
             vis.visualize_activation_map(model, layer.name, img_input)
-    '''
+    
     # save confusion matrix
     raw_data = {'actual': y_test,
                 'preds': y_pred}
@@ -70,10 +66,10 @@ def main(dir=None, n=None):
     '''
 
     # save activation map for random patch
-    vis.visualize_class_activation_map(model, img, "cam.png")
+    #vis.visualize_class_activation_map(model, img_input, "cam.png")
 
     # save filters
-    vis.save_conv_filters_to_file(model)
+    _vis.save_conv_filters_to_file(model)
 
 
 if __name__ == '__main__':
