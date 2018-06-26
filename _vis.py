@@ -125,14 +125,13 @@ def getFilters(model, layer_name, img_width, img_height, input_img=None):
 def save_conv_filters_to_file (model):
     for layer in model.layers:
         if "conv" in layer.name:
-            #print " === ", layer.name, " === ", len(layer.get_weights()), " === ", layer.get_weights()[0].shape
+            print(" === ", layer.name, " === ", len(layer.get_weights()), " === ", layer.get_weights()[0].shape)
             weights = layer.get_weights()[0]
             weights = weights[:,:,0,:]
-            n = int(math.ceil(math.sqrt(layer.nb_filter)))
-            filters = []
-            for i in range(layer.nb_filter):
-                filters.append(weights[:,:,i])
-            _util.plot_to_grid(filters, layer.name, grid_size=n)
+            nb_filters = weights.shape[-1]
+            grid_size = math.ceil(math.sqrt(nb_filters))
+            filters = np.swapaxes(weights, -1, 0)
+            _util.plot_to_grid(filters, layer.name, grid_size=grid_size)
 
 
 
@@ -148,10 +147,10 @@ def visualize_activation_map(model,layer_name,img):
         raise Exception("Feature map of '{}' has {} dimensions which is not supported.".format(layer.name, activations.ndim))
 
     print(activations.shape)
-    nb_maps = activations.shape[3]
+    nb_maps = activations.shape[-1]
     grid_size = math.ceil(math.sqrt(nb_maps))
     feature_maps = activations[0, :, :, :]
-    feature_maps_swap = np.swapaxes(feature_maps, 2, 0)
+    feature_maps_swap = np.swapaxes(feature_maps, -1, 0)
     _util.plot_to_grid(feature_maps_swap, "feature_map_" + layer_name, grid_size=grid_size)
     '''
     feature_maps = []

@@ -35,9 +35,9 @@ def main(dir=None, n=None):
 
     model.summary()
 
-    _util.plot_to_grid(x_test_glom, name='glomeruli_examples', grid_size=7)
+    #_util.plot_to_grid(x_test_glom, name='glomeruli_examples', grid_size=7)
 
-    _util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
+    #_util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
 
     # print('Those should be all ones - glom 1')
     y_test_glom = model.predict(x_test_glom)
@@ -53,7 +53,7 @@ def main(dir=None, n=None):
     '''
     for layer in model.layers:
         if "conv" in layer.name:
-            vis.visualize_activation_map(model, layer.name, img_input)
+            _vis.visualize_activation_map(model, layer.name, img_input)
     
     # save confusion matrix
     raw_data = {'actual': y_test,
