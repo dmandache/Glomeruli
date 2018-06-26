@@ -89,14 +89,12 @@ def main(dir=None, n=None):
     else:
         NB_SAMPLES = n
 
-    DIR_TRAIN_GLOM = IMAGES_DIR_PATH + "/train/01_glomeruli"
-    DIR_TEST_GLOM = IMAGES_DIR_PATH + "/test/01_glomeruli"
-    DIR_TRAIN_NONGLOM = IMAGES_DIR_PATH + "/train/00_nonglomeruli"
-    DIR_TEST_NONGLOM = IMAGES_DIR_PATH + "/test/00_nonglomeruli"
+    DIR_GLOM = IMAGES_DIR_PATH + "/glomeruli"
+    DIR_NONGLOM = IMAGES_DIR_PATH + "/nonglomeruli"
 
     # Load some images and preprocess them
-    x_test_glom = get_n_samples(NB_SAMPLES, dir=DIR_TEST_GLOM, target_size=(299,299))
-    x_test_nonglom = get_n_samples(NB_SAMPLES, dir=DIR_TEST_NONGLOM, target_size=(299,299))
+    x_test_glom = get_n_samples(NB_SAMPLES, dir=DIR_GLOM, target_size=(299,299))
+    x_test_nonglom = get_n_samples(NB_SAMPLES, dir=DIR_NONGLOM, target_size=(299,299))
 
     model = load_model('./output/model.hdf5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity})
 

@@ -272,8 +272,6 @@ def main(dir=None, split=None):
     plt.ylabel('loss')
     plt.savefig('./output/training_plot.png')
 
-    Test.main(dir=IMAGES_DIR_PATH,n=50)
-
 
 if __name__ == '__main__':
 
