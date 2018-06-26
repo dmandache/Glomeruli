@@ -89,7 +89,7 @@ def get_top_layer_model(model):
 
     # compile the model (should be done after setting layers to non-trainable)
     model.compile(optimizer='adam', loss='binary_crossentropy',
-                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity])
+                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 
     return model
 
@@ -104,9 +104,9 @@ def get_mid_layer_model(model):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    model.compile(optimizer=SGD(lr=0.0001, momentum=0.9),
+    model.compile(optimizer='adam', # SGD(lr=0.0001, momentum=0.9),
                   loss='binary_crossentropy',
-                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity])
+                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 
     return model
 
@@ -208,8 +208,11 @@ def get_generators(image_dir, validation_pct=None):
             seed=RANDOM_SEED)
 
         class_dict = train_generator.class2id
+        print("label mapping is : %s", class_dict)
+
         class_weight = {class_dict['nonglomeruli']: 1,  # 0 : 1
-                        class_dict['glomeruli']: 25}  # 1 : 25
+                        class_dict['glomeruli']: 25}    # 1 : 25
+        print("class weighting is : %s", class_weight)
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
 
@@ -251,7 +254,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=200,
+        epochs=100,
         class_weight=class_weight,
         callbacks=[checkpointer, tensorboard, history])
 
