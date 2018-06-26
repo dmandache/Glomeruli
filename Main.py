@@ -208,8 +208,8 @@ def get_generators(image_dir, validation_pct=None):
             seed=RANDOM_SEED)
 
         class_dict = train_generator.id2class
-        class_weight = {classDict['nonglomeruli']: 1,  # 0 : 1
-                        classDict['glomeruli']: 25}  # 1 : 25
+        class_weight = {class_dict['nonglomeruli']: 1,  # 0 : 1
+                        class_dict['glomeruli']: 25}  # 1 : 25
 
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
