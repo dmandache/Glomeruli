@@ -97,7 +97,7 @@ def getFilters(model, layer_name, img_width, img_height, input_img=None):
         img = deprocess_image(input_img_data[0])
         kept_filters.append((img, loss_value))
 
-    # we will stich the best 64 filters on a 8 x 8 grid.
+    # we will stich the best 64 filters on a n x n grid.
     n = 5
 
     # the filters that have the highest loss are assumed to be better-looking.
@@ -122,6 +122,7 @@ def getFilters(model, layer_name, img_width, img_height, input_img=None):
     # save the result to disk
     imsave('filters_%s_%dx%d.png' % (layer_name, n, n), stitched_filters)
 
+
 def save_conv_filters_to_file (model):
     for layer in model.layers:
         if "conv" in layer.name:
@@ -132,7 +133,6 @@ def save_conv_filters_to_file (model):
             grid_size = math.ceil(math.sqrt(nb_filters))
             filters = np.swapaxes(weights, -1, 0)
             _util.plot_to_grid(filters, layer.name, grid_size=grid_size)
-
 
 
 def visualize_activation_map(model,layer_name,img,color_map=None):

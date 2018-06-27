@@ -27,7 +27,7 @@ class_weight = {class_dict['nonglomeruli']:  1,    # 0 : 1
                 class_dict['glomeruli']:     25}      # 1 : 25
 
 NUM_CLASSES = 1
-RANDOM_SEED = 8796
+RANDOM_SEED = None
 CLASS_MODE = 'binary'
 
 # we chose to train the top 2 inception blocks
@@ -117,15 +117,20 @@ def get_generators(image_dir, validation_pct=None):
 
     train_data_gen_args = dict(
                             rescale=1. / 255,
-                            horizontal_flip=True)
+                            rotation_range=90,
+                            horizontal_flip=True,
+                            samplewise_center=True,
+                            samplewise_std_normalization=True)
 
-    test_data_gen_args = dict(rescale=1. / 255)
+    test_data_gen_args = dict(rescale=1. / 255,
+                              samplewise_center=True,
+                              samplewise_std_normalization=True)
 
     if validation_pct is None:
-        DIR_TRAIN_GLOM = image_dir + "/train/01_glomeruli"
-        DIR_TEST_GLOM = image_dir + "/test/01_glomeruli"
-        DIR_TRAIN_NONGLOM = image_dir + "/train/00_nonglomeruli"
-        DIR_TEST_NONGLOM = image_dir + "/test/00_nonglomeruli"
+        DIR_TRAIN_GLOM = image_dir + "/train/glomeruli"
+        DIR_TEST_GLOM = image_dir + "/test/glomeruli"
+        DIR_TRAIN_NONGLOM = image_dir + "/train/nonglomeruli"
+        DIR_TEST_NONGLOM = image_dir + "/test/nonglomeruli"
 
         '''
         if DATA_IS_SPLIT:
@@ -188,7 +193,6 @@ def get_generators(image_dir, validation_pct=None):
 
         test_datagen = FlyGenerator.CustomImageDataGenerator(**test_data_gen_args)
 
-
         train_generator = train_datagen.flow_from_image_lists(
             image_lists=image_lists,
             category='training',
@@ -206,6 +210,8 @@ def get_generators(image_dir, validation_pct=None):
             batch_size=BATCH_SIZE,
             class_mode=CLASS_MODE,
             seed=RANDOM_SEED)
+
+        # modify global variables if necessary
 
         class_dict = train_generator.class2id
         print("label mapping is : %s", class_dict)

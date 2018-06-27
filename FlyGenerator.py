@@ -10,7 +10,6 @@ from keras import backend as K
 from keras.preprocessing.image import (ImageDataGenerator, Iterator,
                                        array_to_img, img_to_array, load_img)
 
-RANDOM_SEED = 0
 MAX_NUM_IMAGES_PER_CLASS = 2 ** 27 - 1  # ~134M
 VALID_IMAGE_FORMATS = frozenset(['jpg', 'jpeg', 'JPG', 'JPEG', 'png', 'PNG'])
 
