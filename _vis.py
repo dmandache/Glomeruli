@@ -17,11 +17,11 @@ import _util
 '''
 
 
-def visualize_model_max_activations(model, img_shape=(299,299,3), save_all_filters=True, input_img=None):
+def visualize_model_max_activations(model, img_shape=(299,299,3),  grad_step=1.0, grad_iter=20, save_all_filters=True, input_img=None):
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting maximum activations of layer ', layer.name)
-            visualize_layer_max_activations(layer, img_shape, save_all_filters, input_img)
+            visualize_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, save_all_filters, input_img)
 
 
 def visualize_model_weights(model):
@@ -43,13 +43,15 @@ def visualize_model_activation_maps(model, img, color_map=None):
 '''
 
 
-def visualize_layer_max_activations(layer, img_shape=(299,299,3), grad_step=1.0, grad_iter=100, save_all_filters=True, input_img=None):
+def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), grad_step=1.0, grad_iter=100, save_all_filters=True, img=None):
 
     (img_width, img_height, ch) = img_shape
 
     weights = layer.get_weights()[0]
     nb_filters = weights.shape[-1]
     grid_size = math.ceil(math.sqrt(nb_filters))
+
+    input_img = model_input
 
     kept_filters = []
 
@@ -61,6 +63,7 @@ def visualize_layer_max_activations(layer, img_shape=(299,299,3), grad_step=1.0,
         # we build a loss function that maximizes the activation
         # of the nth filter of the layer considered
         layer_output = layer.output
+
         if K.image_dim_ordering() == 'th':
             loss = K.mean(layer_output[:, filter_index, :, :])
         else:
@@ -76,11 +79,11 @@ def visualize_layer_max_activations(layer, img_shape=(299,299,3), grad_step=1.0,
         iterate = K.function([input_img, K.learning_phase()], [loss, grads])
 
         # we start from a gray image with some random noise
-        if input_img is None:
+        if img is None:
             input_img_data = np.random.random((1, img_width, img_height, ch))
             input_img_data = (input_img_data - 0.5) * 20 + 128
         else:
-            input_img_data = np.expand_dims(input_img, 0)
+            input_img_data = np.expand_dims(img, 0)
 
         # we run gradient ascent for n steps
         for i in range(grad_iter):

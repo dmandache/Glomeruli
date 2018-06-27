@@ -49,11 +49,11 @@ def main(dir=None, n=None):
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli predicted as %d', y_test_glom[10][0])
 
-    _vis.visualize_model_activation_maps(model, img_input, color_map='jet')
-
     _vis.visualize_model_max_activations(model)
 
     _vis.visualize_model_weights(model)
+
+    _vis.visualize_model_activation_maps(model, img_input, color_map='jet')
 
     '''
     # save confusion matrix
