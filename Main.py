@@ -115,16 +115,10 @@ def get_generators(image_dir, validation_pct=None):
 
     global class_dict, class_weight
 
-    train_data_gen_args = dict(
-                            rescale=1. / 255,
-                            rotation_range=90,
-                            horizontal_flip=True,
-                            samplewise_center=True,
-                            samplewise_std_normalization=True)
+    train_data_gen_args = dict( rescale=1. / 255,
+                                rotation_range=90)
 
-    test_data_gen_args = dict(rescale=1. / 255,
-                              samplewise_center=True,
-                              samplewise_std_normalization=True)
+    test_data_gen_args = dict(rescale=1. / 255)
 
     if validation_pct is None:
         DIR_TRAIN_GLOM = image_dir + "/train/glomeruli"
@@ -232,7 +226,7 @@ def main(dir=None, split=None):
         IMAGES_DIR_PATH = dir
 
     if split == None:
-        VALIDATION_SPLIT = 5
+        VALIDATION_SPLIT = 10
     else:
         VALIDATION_SPLIT = split
 
@@ -248,7 +242,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=20,
+        epochs=50,
         class_weight=class_weight,
         callbacks=[])
 
@@ -260,7 +254,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=100,
+        epochs=300,
         class_weight=class_weight,
         callbacks=[checkpointer, tensorboard, history])
 
