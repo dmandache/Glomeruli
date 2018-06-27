@@ -33,14 +33,14 @@ def main(dir=None, n=None):
 
     model.summary()
 
-    #_util.plot_to_grid(x_test_glom, name='glomeruli_examples', grid_size=7)
+    _util.plot_to_grid(x_test_glom, name='glomeruli_examples', grid_size=7)
 
-    #_util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
+    _util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
 
     # print('Those should be all ones - glom 1')
     y_test_glom = model.predict(x_test_glom)
 
-    #print('Those should be all zeros - nonglom 0')
+    # print('Those should be all zeros - nonglom 0')
     y_test_nonglom = model.predict(x_test_nonglom)
 
     # save activation maps
@@ -48,9 +48,12 @@ def main(dir=None, n=None):
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli predicted as %d', y_test_glom[10][0])
-    for layer in model.layers:
-        if "conv" in layer.name:
-            _vis.visualize_activation_map(model, layer.name, img_input, color_map='jet')
+
+    _vis.visualize_model_activation_maps(model, img_input, color_map='jet')
+
+    _vis.visualize_model_max_activations(model)
+
+    _vis.visualize_model_weights(model)
 
     '''
     # save confusion matrix
@@ -62,12 +65,6 @@ def main(dir=None, n=None):
     with open("confusion-matrix.txt", "w") as text_file:
         text_file.write(tab.to_string())
     '''
-
-    # save activation map for random patch
-    #vis.visualize_class_activation_map(model, img_input, "cam.png")
-
-    # save filters
-    #_vis.save_conv_filters_to_file(model)
 
 
 if __name__ == '__main__':
