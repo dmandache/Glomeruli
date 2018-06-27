@@ -7,7 +7,7 @@ import numpy as np
 import pandas as pd
 
 from keras.models import Model
-from keras.optimizers import SGD
+from keras import optimizers
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.applications.inception_v3 import InceptionV3
 from keras.preprocessing.image import ImageDataGenerator
@@ -104,7 +104,7 @@ def get_mid_layer_model(model):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    model.compile(optimizer= SGD(lr=0.00001, momentum=0.9),
+    model.compile(optimizer= optimizers.Adagrad(lr=0.0001, epsilon=None, decay=0.00001), # optimizers.SGD(lr=0.0001, momentum=0.9),
                   loss='binary_crossentropy',
                   metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 

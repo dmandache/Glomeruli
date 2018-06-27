@@ -135,7 +135,7 @@ def save_conv_filters_to_file (model):
 
 
 
-def visualize_activation_map(model,layer_name,img):
+def visualize_activation_map(model,layer_name,img,color_map=None):
     layer = model.get_layer(layer_name)
 
     get_activations = K.function([model.layers[0].input, K.learning_phase()], [layer.output, ])
@@ -151,13 +151,7 @@ def visualize_activation_map(model,layer_name,img):
     grid_size = math.ceil(math.sqrt(nb_maps))
     feature_maps = activations[0, :, :, :]
     feature_maps_swap = np.swapaxes(feature_maps, -1, 0)
-    _util.plot_to_grid(feature_maps_swap, "feature_map_" + layer_name, grid_size=grid_size)
-    '''
-    feature_maps = []
-    for i in range(nb_maps):
-        feature_maps.append(activations[0,:,:,i])
-        plot_to_grid(feature_maps, "feature_map_"+layer_name, grid_size=6)
-    '''
+    _util.plot_to_grid(feature_maps_swap, "activation_map_" + layer_name, grid_size=grid_size, color_map=color_map)
 
 
 def visualize_class_activation_map(model, img, output_path):

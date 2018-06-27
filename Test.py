@@ -49,7 +49,7 @@ def main(dir=None, n=None):
     print('Glomeruli predicted as %d', y_test_glom[10][0])
     for layer in model.layers:
         if "conv" in layer.name:
-            _vis.visualize_activation_map(model, layer.name, img_input)
+            _vis.visualize_activation_map(model, layer.name, img_input, color_map='jet')
 
     '''
     # save confusion matrix

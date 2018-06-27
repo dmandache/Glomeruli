@@ -5,6 +5,12 @@ import numpy as np
 from PIL import Image
 from scipy.misc import imsave
 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+from matplotlib import cm
+
+
 def get_output_layer(model, layer_name):
     # get the symbolic outputs of each "key" layer (we gave them unique names).
     layer_dict = dict([(layer.name, layer) for layer in model.layers])
@@ -35,7 +41,7 @@ def get_n_samples(n=32, dir=None, target_size=(299,299)):
     #samples = np.expand_dims(samples, axis=3)
     return samples
 
-def plot_to_grid(batch, name='images', grid_size=7, random=False):
+def plot_to_grid(batch, name='images', grid_size=7, random=False, color_map=None):
     # img_width, img_height = patches[0].shape
     img_size = batch[0].shape[0]
     try:
@@ -83,5 +89,9 @@ def plot_to_grid(batch, name='images', grid_size=7, random=False):
 
     # save the result to disk
     # imsave('./patches_%s_%d-%d.png' % (name, n, nt), stitched_patches)
+    if color_map:
+        stitched_images /= np.max(stitched_images)
+        stitched_images = Image.fromarray(np.uint8(cm.jet(stitched_images) * 255))
+        name += '_jet'
     imsave('./output/%s.png' % name, stitched_images)
 
