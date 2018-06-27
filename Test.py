@@ -28,6 +28,7 @@ def main(dir=None, n=None):
     x_test_glom = _util.get_n_samples(NB_SAMPLES, dir=DIR_GLOM, target_size=(299, 299))
     x_test_nonglom = _util.get_n_samples(NB_SAMPLES, dir=DIR_NONGLOM, target_size=(299, 299))
 
+    # load model
     model = load_model('./output/model.hdf5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
 
     model.summary()

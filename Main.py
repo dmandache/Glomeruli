@@ -104,7 +104,7 @@ def get_mid_layer_model(model):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    model.compile(optimizer= optimizers.Adagrad(lr=0.0001, epsilon=None, decay=0.00001), # optimizers.SGD(lr=0.0001, momentum=0.9),
+    model.compile(optimizer=optimizers.SGD(lr=0.0001, momentum=0.9, decay=1e-6),
                   loss='binary_crossentropy',
                   metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 
@@ -232,7 +232,7 @@ def main(dir=None, split=None):
         IMAGES_DIR_PATH = dir
 
     if split == None:
-        VALIDATION_SPLIT = 10
+        VALIDATION_SPLIT = 5
     else:
         VALIDATION_SPLIT = split
 

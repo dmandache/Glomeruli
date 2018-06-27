@@ -1,8 +1,8 @@
 from keras import backend as K
-from scipy.misc import imsave
 from PIL import Image
 import numpy as np
 import math
+import time
 
 import matplotlib
 matplotlib.use('Agg')
@@ -11,61 +11,56 @@ from matplotlib import cm
 
 import _util
 
-# util function to convert a tensor into a valid image
-def deprocess_image(x):
-    # normalize tensor: center on 0., ensure std is 0.1
-    x -= x.mean()
-    x /= (x.std() + 1e-5)
-    x *= 0.1
 
-    # clip to [0, 1]
-    x += 0.5
-    x = np.clip(x, 0, 1)
+'''
+    Model functions
+'''
 
-    # convert to RGB array
-    x *= 255
-    if K.image_dim_ordering() == 'th':
-        x = x.transpose((1, 2, 0))
-    x = np.clip(x, 0, 255).astype('uint8')
-    return x
 
-# utility function to normalize a tensor by its L2 norm
-def normalize(x):
-    return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
+def visualize_model_max_activations(model, img_shape=(299,299,3), save_all_filters=True, input_img=None):
+    for layer in model.layers:
+        if 'conv' in layer.name:
+            print('Plotting maximum activations of layer ', layer.name)
+            visualize_layer_max_activations(layer, img_shape, save_all_filters, input_img)
 
-def getFilters(model, layer_name, img_width, img_height, input_img=None):
 
-    nb_filters = 64
+def visualize_model_weights(model):
+    for layer in model.layers:
+        if 'conv' in layer.name:
+            print('Plotting weights of layer ', layer.name)
+            visualize_layer_weights(layer)
 
-    if input_img is None:
-        input_img = model.input
 
-    layer_dict = dict([(layer.name, layer) for layer in model.layers])
+def visualize_model_activation_maps(model, img, color_map=None):
+    for layer in model.layers:
+        if 'conv' in layer.name:
+            print('Plotting activation maps of layer ', layer.name)
+            visualize_layer_activation_maps(model, layer, img, color_map)
 
-    filter_index = 0  # can be any integer from 0 to 511, as there are 512 filters in that layer
 
-    # build a loss function that maximizes the activation
-    # of the nth filter of the layer considered
-    layer_output = layer_dict[layer_name].output
-    loss = K.mean(layer_output[:, :, :, filter_index])
+'''
+    Layer functions
+'''
 
-    # compute the gradient of the input picture wrt this loss
-    grads = K.gradients(loss, input_img)[0]
 
-    # normalization trick: we normalize the gradient
-    grads /= (K.sqrt(K.mean(K.square(grads))) + 1e-5)
+def visualize_layer_max_activations(layer, img_shape=(299,299,3), grad_step=1.0, grad_iter=100, save_all_filters=True, input_img=None):
 
-    # this function returns the loss and grads given the input picture
-    iterate = K.function([input_img], [loss, grads])
+    (img_width, img_height, ch) = img_shape
+
+    weights = layer.get_weights()[0]
+    nb_filters = weights.shape[-1]
+    grid_size = math.ceil(math.sqrt(nb_filters))
 
     kept_filters = []
-    for filter_index in range(0, nb_filters-1):
-        # we only scan through the first 200 filters,
-        # but there are actually 512 of them
+
+    for filter_index in range(nb_filters):
+
+        print('Processing filter %d of %d' % (filter_index, nb_filters))
+        start_time = time.time()
 
         # we build a loss function that maximizes the activation
         # of the nth filter of the layer considered
-        layer_output = layer_dict[layer_name].output
+        layer_output = layer.output
         if K.image_dim_ordering() == 'th':
             loss = K.mean(layer_output[:, filter_index, :, :])
         else:
@@ -80,67 +75,57 @@ def getFilters(model, layer_name, img_width, img_height, input_img=None):
         # this function returns the loss and grads given the input picture
         iterate = K.function([input_img, K.learning_phase()], [loss, grads])
 
-        # step size for gradient ascent
-        step = 1.
-
         # we start from a gray image with some random noise
+        if input_img is None:
+            input_img_data = np.random.random((1, img_width, img_height, ch))
+            input_img_data = (input_img_data - 0.5) * 20 + 128
+        else:
+            input_img_data = np.expand_dims(input_img, 0)
 
-        input_img_data = np.random.random((1, img_height, img_width, 1)) * 20 + 128.
-
-        # we run gradient ascent for 20 steps
-        for i in range(20):
+        # we run gradient ascent for n steps
+        for i in range(grad_iter):
             loss_value, grads_value = iterate([input_img_data])
-            input_img_data += grads_value * step
+            input_img_data += grads_value * grad_step
+
+            print('Current loss value:', loss_value)
+            if loss_value <= 0. and save_all_filters is False:
+                # some filters get stuck to 0, we can skip them
+                break
 
         # decode the resulting input image
-
-        img = deprocess_image(input_img_data[0])
-        kept_filters.append((img, loss_value))
-
-    # we will stich the best 64 filters on a n x n grid.
-    n = 5
+        if save_all_filters is True or loss_value > 0:
+            img = deprocess_image(input_img_data[0])
+            kept_filters.append((img, loss_value))
+        end_time = time.time()
+        print('Filter %d processed in %ds' % (filter_index, end_time - start_time))
 
     # the filters that have the highest loss are assumed to be better-looking.
-    # we will only keep the top 64 filters.
     kept_filters.sort(key=lambda x: x[1], reverse=True)
-    kept_filters = kept_filters[:n * n]
 
-    # build a black picture with enough space for
-    # our 8 x 8 filters of size 128 x 128, with a 5px margin in between
-    margin = 5
-    width = n * img_width + (n - 1) * margin
-    height = n * img_height + (n - 1) * margin
-    stitched_filters = np.zeros((width, height, 3))
+    # unzip filters and their losses
+    filters, losses = zip(*kept_filters)
+    filters = list(filters)
 
-    # fill the picture with our saved filters
-    print(len(kept_filters))
-    for i in range(n):
-        for j in range(n):
-            img, loss = kept_filters[i * n + j]
-            stitched_filters[(img_width + margin) * i: (img_width + margin) * i + img_width,
-                            (img_height + margin) * j: (img_height + margin) * j + img_height, :] = img
-    # save the result to disk
-    imsave('filters_%s_%dx%d.png' % (layer_name, n, n), stitched_filters)
+    file_name = 'filters_%s_%d' % (layer.name, nb_filters)
+
+    # save to file
+    _util.plot_to_grid(filters, file_name, grid_size)
 
 
-def save_conv_filters_to_file (model):
-    for layer in model.layers:
-        if "conv" in layer.name:
-            print(" === ", layer.name, " === ", len(layer.get_weights()), " === ", layer.get_weights()[0].shape)
-            weights = layer.get_weights()[0]
-            weights = weights[:,:,0,:]
-            nb_filters = weights.shape[-1]
-            grid_size = math.ceil(math.sqrt(nb_filters))
-            filters = np.swapaxes(weights, -1, 0)
-            _util.plot_to_grid(filters, layer.name, grid_size=grid_size)
+def visualize_layer_weights(layer):
+    weights = layer.get_weights()[0]
+    weights = weights[:, :, 0, :]
+    nb_filters = weights.shape[-1]
+    grid_size = math.ceil(math.sqrt(nb_filters))
+    filters = np.swapaxes(weights, -1, 0)
+    file_name = 'weights_%s_%d' % (layer.name, nb_filters)
+    _util.plot_to_grid(filters, file_name, grid_size=grid_size)
 
 
-def visualize_activation_map(model,layer_name,img,color_map=None):
-    layer = model.get_layer(layer_name)
+def visualize_layer_activation_maps(model, layer, img, color_map=None):
 
     get_activations = K.function([model.layers[0].input, K.learning_phase()], [layer.output, ])
     activations = get_activations([img, 0])[0]
-
 
     # For now we only handle feature map with 4 dimensions
     if activations.ndim != 4:
@@ -151,7 +136,8 @@ def visualize_activation_map(model,layer_name,img,color_map=None):
     grid_size = math.ceil(math.sqrt(nb_maps))
     feature_maps = activations[0, :, :, :]
     feature_maps_swap = np.swapaxes(feature_maps, -1, 0)
-    _util.plot_to_grid(feature_maps_swap, "activation_map_" + layer_name, grid_size=grid_size, color_map=color_map)
+    file_name = "activation_maps_" + layer.name
+    _util.plot_to_grid(feature_maps_swap, file_name, grid_size=grid_size, color_map=color_map)
 
 
 def visualize_class_activation_map(model, img, output_path):
@@ -173,3 +159,31 @@ def visualize_class_activation_map(model, img, output_path):
     cam_new = Image.Image.resize(cam, (height, width))
     cam_new = Image.fromarray(np.uint8(cm.jet(cam_new) * 255))
     cam_new.save(output_path)
+
+
+'''
+    Utility functions
+'''
+
+# util function to convert a tensor into a valid image
+def deprocess_image(x):
+    # normalize tensor: center on 0., ensure std is 0.1
+    x -= x.mean()
+    x /= (x.std() + 1e-5)
+    x *= 0.1
+
+    # clip to [0, 1]
+    x += 0.5
+    x = np.clip(x, 0, 1)
+
+    # convert to RGB array
+    x *= 255
+    if K.image_dim_ordering() == 'th':
+        x = x.transpose((1, 2, 0))
+    x = np.clip(x, 0, 255).astype('uint8')
+    return x
+
+
+# utility function to normalize a tensor by its L2 norm
+def normalize(x):
+    return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
