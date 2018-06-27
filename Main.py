@@ -50,7 +50,7 @@ checkpointer = ModelCheckpoint(
 
 # Helper: Stop when we stop learning.
 early_stopper = EarlyStopping(patience=100)
-444
+
 # Helper: TensorBoard
 tensorboard = TensorBoard(log_dir='./output/events')
 
@@ -104,7 +104,7 @@ def get_mid_layer_model(model):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    model.compile(optimizer='adam', # SGD(lr=0.0001, momentum=0.9),
+    model.compile(optimizer= SGD(lr=0.00001, momentum=0.9),
                   loss='binary_crossentropy',
                   metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 
@@ -242,7 +242,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=10,
+        epochs=20,
         class_weight=class_weight,
         callbacks=[])
 
@@ -254,7 +254,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=1000,
+        epochs=100,
         class_weight=class_weight,
         callbacks=[checkpointer, tensorboard, history])
 

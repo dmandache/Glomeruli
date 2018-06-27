@@ -10,9 +10,6 @@ import _util
 import _vis
 
 
-from vis.visualization import visualize_activation
-
-
 def main(dir=None, n=None):
     if dir is None:
         IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data"
