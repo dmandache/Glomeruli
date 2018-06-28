@@ -298,7 +298,6 @@ def main(dir=None, split=None):
     plt.ylabel('loss')
     plt.savefig('./output/training_plot_finetune.png')
     '''
-    n = list(validation_generator)
 
     y_true = []
     y_pred = []
