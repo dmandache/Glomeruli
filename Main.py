@@ -27,8 +27,8 @@ class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
 class_weight = {class_dict['nonglomeruli']:  1,    # 0 : 1
                 class_dict['glomeruli']:     25}      # 1 : 25
 
-DENSE_TRAIN_EPOCHS = 2
-FINE_TUNE_EPOCHS = 5
+DENSE_TRAIN_EPOCHS = 20
+FINE_TUNE_EPOCHS = 30
 
 NUM_CLASSES = 1
 RANDOM_SEED = None
@@ -73,7 +73,6 @@ tensorboard = TensorBoard(log_dir='./output/events')
 history_dense = History()
 
 history_finetune = History()
-
 
 def get_model(num_classes, weights='imagenet'):
     # create the base pre-trained model
@@ -250,7 +249,7 @@ def main(dir=None, split=None):
     train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES = get_generators(IMAGES_DIR_PATH, VALIDATION_SPLIT)
 
     os.makedirs('./output/checkpoints/', exist_ok=True)
-    '''
+
     print("Training dense classifier from scratch")
     # Get and train the top layers.
     model = get_top_layer_model(model)
@@ -297,16 +296,6 @@ def main(dir=None, split=None):
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot_finetune.png')
-    '''
-
-    y_true = []
-    y_pred = []
-    for x,y in validation_generator:
-        y_ = model.predict(x)
-        y_true.append(y)
-        y_pred.append(y_)
-
-    _util.confusion_matrix(y_true, y_pred)
 
     Test.main(IMAGES_DIR_PATH)
 
