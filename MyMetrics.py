@@ -2,7 +2,6 @@ from keras import backend as K
 
 
 def f1_score(y_true, y_pred):
-
     # Count positive samples.
     c1 = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     c2 = K.sum(K.round(K.clip(y_pred, 0, 1)))
@@ -24,7 +23,6 @@ def f1_score(y_true, y_pred):
 
 
 def precision(y_true, y_pred):
-
     # Count positive samples.
     c1 = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     c2 = K.sum(K.round(K.clip(y_pred, 0, 1)))
@@ -41,7 +39,6 @@ def precision(y_true, y_pred):
 
 
 def recall(y_true, y_pred):
-
     # Count positive samples.
     c1 = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     c3 = K.sum(K.round(K.clip(y_true, 0, 1)))
@@ -54,18 +51,58 @@ def recall(y_true, y_pred):
 
     return recall
 
-def sensitivity(y_true, y_pred):
 
+def sensitivity(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
     sensitivity = true_positives / (possible_positives + K.epsilon())
 
     return sensitivity
 
-def specificity(y_true, y_pred):
 
-    true_negatives = K.sum(K.round(K.clip((1-y_true) * (1-y_pred), 0, 1)))
-    possible_negatives = K.sum(K.round(K.clip(1-y_true, 0, 1)))
+def specificity(y_true, y_pred):
+    true_negatives = K.sum(K.round(K.clip((1 - y_true) * (1 - y_pred), 0, 1)))
+    possible_negatives = K.sum(K.round(K.clip(1 - y_true, 0, 1)))
     specificity = true_negatives / (possible_negatives + K.epsilon())
 
     return specificity
+
+
+def mcor(y_true, y_pred):
+    # matthews_correlation
+    y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    y_pred_neg = 1 - y_pred_pos
+
+    y_pos = K.round(K.clip(y_true, 0, 1))
+    y_neg = 1 - y_pos
+
+    tp = K.sum(y_pos * y_pred_pos)
+    tn = K.sum(y_neg * y_pred_neg)
+
+    fp = K.sum(y_neg * y_pred_pos)
+    fn = K.sum(y_pos * y_pred_neg)
+
+    numerator = (tp * tn - fp * fn)
+    denominator = K.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+
+    return numerator / (denominator + K.epsilon())
+
+
+def mcor(y_true, y_pred):
+    # matthews_correlation
+    y_pred_pos = K.round(K.clip(y_pred, 0, 1))
+    y_pred_neg = 1 - y_pred_pos
+
+    y_pos = K.round(K.clip(y_true, 0, 1))
+    y_neg = 1 - y_pos
+
+    tp = K.sum(y_pos * y_pred_pos)
+    tn = K.sum(y_neg * y_pred_neg)
+
+    fp = K.sum(y_neg * y_pred_pos)
+    fn = K.sum(y_pos * y_pred_neg)
+
+    numerator = (tp * tn - fp * fn)
+    denominator = K.sqrt((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn))
+
+    return numerator / (denominator + K.epsilon())

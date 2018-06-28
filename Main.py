@@ -44,15 +44,17 @@ FC_LAYER_SIZE = 1024
 
 # Helper: Save the model.
 checkpointer_dense = ModelCheckpoint(
-    filepath='./output/checkpoints/inception.dense.{epoch:03d}-{val_loss:.2f}.hdf5',
+    filepath='./output/checkpoints/inception.dense.{epoch:03d}-{val_f1_score:.2f}.hdf5',
     verbose=1,
     monitor='val_f1_score',
+    mode='max',
     save_best_only=True)
 
 checkpointer_finetune = ModelCheckpoint(
-    filepath='./output/checkpoints/inception.finetune.{epoch:03d}-{val_loss:.2f}.hdf5',
+    filepath='./output/checkpoints/inception.finetune.{epoch:03d}-{val_f1_score:.2f}.hdf5',
     verbose=1,
     monitor='val_f1_score',
+    mode='max',
     save_best_only=True)
 
 # Helper: Stop when we stop learning.
