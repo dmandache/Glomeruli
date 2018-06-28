@@ -4,6 +4,7 @@ from MyMetrics import sensitivity, specificity, f1_score
 import argparse
 
 import numpy as np
+import math
 from scipy.misc import imsave
 
 import _util
@@ -17,7 +18,7 @@ def main(dir=None, n=None):
         IMAGES_DIR_PATH = dir
 
     if n is None:
-        NB_SAMPLES = 50
+        NB_SAMPLES = 64
     else:
         NB_SAMPLES = n
 
@@ -42,31 +43,26 @@ def main(dir=None, n=None):
 
     # print('Those should be all ones - glom 1')
     y_test_glom = model.predict(x_test_glom)
+    y_true_glom = list(np.ones(len(y_test_glom)))
     TP = np.count_nonzero(y_test_glom >= 0.7)
     print('True Positives ', TP)
 
     # print('Those should be all zeros - nonglom 0')
     y_test_nonglom = model.predict(x_test_nonglom)
+    y_true_nonglom = list(np.zeros(len(y_test_nonglom)))
     TN = np.count_nonzero(y_test_nonglom <= 0.3)
     print('True Negatives ', TN)
-
 
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli probability %d', y_test_glom[10][0])
 
-    _vis.visualize_model_max_activations(model)
-
     _vis.visualize_model_weights(model)
 
     _vis.visualize_model_activation_maps(model, img_input, color_map='jet')
 
-    '''
-    # save confusion matrix
-    _util.confusion_matrix(y_true, y_pred)
-    
-    '''
+    _vis.visualize_model_max_activations(model, grad_iter=100)
 
 
 if __name__ == '__main__':

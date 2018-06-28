@@ -144,11 +144,15 @@ def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), g
 def visualize_layer_weights(layer):
     weights = layer.get_weights()[0]
     weights = weights[:, :, 0, :]
-    nb_filters = weights.shape[-1]
-    grid_size = math.ceil(math.sqrt(nb_filters))
-    filters = np.swapaxes(weights, -1, 0)
-    file_name = 'weights_%s_%d' % (layer.name, nb_filters)
-    _util.plot_to_grid(filters, file_name, grid_size=grid_size)
+    width, height, nb_filters = weights.shape
+    # only plot square conv filters
+    if width == height:
+        grid_size = math.ceil(math.sqrt(nb_filters))
+        filters = np.swapaxes(weights, -1, 0)
+        file_name = 'weights_%s_%d' % (layer.name, nb_filters)
+        _util.plot_to_grid(filters, file_name, grid_size=grid_size)
+    else:
+        print('Skipping layer %s with conv filters of size %d x %d', (layer.name, width, height))
 
 
 def visualize_layer_activation_maps(model, layer, img, color_map=None):
