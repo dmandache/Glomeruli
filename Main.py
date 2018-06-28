@@ -58,7 +58,9 @@ checkpointer_finetune = ModelCheckpoint(
     save_best_only=True)
 
 # Helper: Stop when we stop learning.
-early_stopper = EarlyStopping(patience=100)
+early_stopper_dense = EarlyStopping(patience=10)
+
+early_stopper_finetune = EarlyStopping(patience=30)
 
 # Helper: TensorBoard
 tensorboard = TensorBoard(log_dir='./output/events')
@@ -255,7 +257,7 @@ def main(dir=None, split=None):
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
         epochs=50,
         class_weight=class_weight,
-        callbacks=[checkpointer_dense, tensorboard, history_dense])
+        callbacks=[checkpointer_dense, early_stopper_dense, tensorboard, history_dense])
 
     print("Fine-tune InceptionV3, bottom layers frozen")
     # Get and train the mid layers.
@@ -267,7 +269,7 @@ def main(dir=None, split=None):
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
         epochs=300,
         class_weight=class_weight,
-        callbacks=[checkpointer_finetune, tensorboard, history_finetune])
+        callbacks=[checkpointer_finetune, early_stopper_finetune, tensorboard, history_finetune])
 
     # save model
     model.save('./output/model.hdf5', overwrite=True)
