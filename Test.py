@@ -64,6 +64,7 @@ def main(dir=None, n=None):
 
     '''
     # save confusion matrix
+    _util.confusion_matrix(y_true, y_pred)
     
     '''
 

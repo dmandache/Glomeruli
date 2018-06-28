@@ -254,7 +254,6 @@ def main(dir=None, split=None):
     print("Training dense classifier from scratch")
     # Get and train the top layers.
     model = get_top_layer_model(model)
-    model = multi_gpu_model(model, gpus=8)
     model.fit_generator(
         train_generator,
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
@@ -267,7 +266,6 @@ def main(dir=None, split=None):
     print("Fine-tune InceptionV3, bottom layers frozen")
     # Get and train the mid layers.
     model = get_mid_layer_model(model)
-    model = multi_gpu_model(model, gpus=8)
     model.fit_generator(
         train_generator,
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
