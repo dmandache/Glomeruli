@@ -20,11 +20,15 @@ import matplotlib.pyplot as plt
 import MyMetrics
 import FlyGenerator
 import Test
+import _util
 
 class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
 
 class_weight = {class_dict['nonglomeruli']:  1,    # 0 : 1
                 class_dict['glomeruli']:     25}      # 1 : 25
+
+DENSE_TRAIN_EPOCHS = 2
+FINE_TUNE_EPOCHS = 5
 
 NUM_CLASSES = 1
 RANDOM_SEED = None
@@ -221,11 +225,11 @@ def get_generators(image_dir, validation_pct=None):
         # modify global variables if necessary
 
         class_dict = train_generator.class2id
-        print("label mapping is : %s", class_dict)
+        print("label mapping is : ", class_dict)
 
         class_weight = {class_dict['nonglomeruli']: 1,  # 0 : 1
                         class_dict['glomeruli']: 25}    # 1 : 25
-        print("class weighting is : %s", class_weight)
+        print("class weighting is : ", class_weight)
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
 
@@ -255,7 +259,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=50,
+        epochs=DENSE_TRAIN_EPOCHS,
         class_weight=class_weight,
         callbacks=[checkpointer_dense, early_stopper_dense, tensorboard, history_dense])
 
@@ -267,7 +271,7 @@ def main(dir=None, split=None):
         steps_per_epoch=NUM_TRAIN_SAMPLES//BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
-        epochs=300,
+        epochs=FINE_TUNE_EPOCHS,
         class_weight=class_weight,
         callbacks=[checkpointer_finetune, early_stopper_finetune, tensorboard, history_finetune])
 
@@ -293,6 +297,11 @@ def main(dir=None, split=None):
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot_finetune.png')
+
+    x_test, y_true_test = validation_generator
+    y_pred_test = model.predict(x_test)
+
+    _util.confusion_matrix(y_true_test, y_pred_test)
 
     Test.main(IMAGES_DIR_PATH)
 

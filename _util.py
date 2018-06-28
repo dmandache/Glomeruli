@@ -4,12 +4,21 @@ import math
 import numpy as np
 from PIL import Image
 from scipy.misc import imsave
+import pandas as pd
 
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
+def confusion_matrix(y_test, y_pred):
+    raw_data = {'actual': y_test,
+                'preds': y_pred}
+    df = pd.DataFrame(raw_data, columns=['actual', 'preds'])
+    tab = pd.crosstab(df.actual, df.preds, margins=True)
+    print(tab)
+    with open("confusion-matrix.txt", "w") as text_file:
+        text_file.write(tab.to_string())
 
 def get_output_layer(model, layer_name):
     # get the symbolic outputs of each "key" layer (we gave them unique names).

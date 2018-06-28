@@ -50,7 +50,7 @@ def main(dir=None, n=None):
     TN = np.count_nonzero(y_test_nonglom <= 0.3)
     print('True Negatives ', TN)
 
-    # save activation maps
+
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
@@ -64,13 +64,7 @@ def main(dir=None, n=None):
 
     '''
     # save confusion matrix
-    raw_data = {'actual': y_test,
-                'preds': y_pred}
-    df = pd.DataFrame(raw_data, columns=['actual', 'preds'])
-    tab = pd.crosstab(df.actual, df.preds, margins=True)
-    print(tab)
-    with open("confusion-matrix.txt", "w") as text_file:
-        text_file.write(tab.to_string())
+    
     '''
 
 
