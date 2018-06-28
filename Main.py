@@ -250,7 +250,7 @@ def main(dir=None, split=None):
     train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES = get_generators(IMAGES_DIR_PATH, VALIDATION_SPLIT)
 
     os.makedirs('./output/checkpoints/', exist_ok=True)
-
+    '''
     print("Training dense classifier from scratch")
     # Get and train the top layers.
     model = get_top_layer_model(model)
@@ -297,8 +297,10 @@ def main(dir=None, split=None):
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot_finetune.png')
+    '''
+    n = list(validation_generator)
 
-    x_test, y_true_test = validation_generator
+    x_test, y_true_test = zip(*n)
     y_pred_test = model.predict(x_test)
 
     _util.confusion_matrix(y_true_test, y_pred_test)
