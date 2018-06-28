@@ -28,8 +28,8 @@ class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
 class_weight = {class_dict['nonglomeruli']:  1,    # 0 : 1
                 class_dict['glomeruli']:     25}      # 1 : 25
 
-DENSE_TRAIN_EPOCHS = 20
-FINE_TUNE_EPOCHS = 30
+DENSE_TRAIN_EPOCHS = 30
+FINE_TUNE_EPOCHS = 300
 
 NUM_CLASSES = 1
 RANDOM_SEED = None
