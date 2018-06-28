@@ -1,6 +1,6 @@
 import os
 import random
-
+import math
 import numpy as np
 from PIL import Image
 from scipy.misc import imsave
@@ -41,14 +41,20 @@ def get_n_samples(n=32, dir=None, target_size=(299,299)):
     #samples = np.expand_dims(samples, axis=3)
     return samples
 
-def plot_to_grid(batch, name='images', grid_size=7, random=False, color_map=None):
-    # img_width, img_height = patches[0].shape
+def plot_to_grid(batch, name='images', grid_size=None, random=False, color_map=None):
+
     img_size = batch[0].shape[0]
+
+    nt = len(batch)  # nt = total number of images
+
+    if grid_size is None:
+        grid_size = math.ceil(math.sqrt(nt))
+
     try:
         ch = batch[0].shape[2]
     except:
         ch = 1
-    nt = len(batch)            # nt = total number of images
+
     n = grid_size * grid_size  # n = images displayed (based on grid size)
 
     if n <= nt:

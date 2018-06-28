@@ -43,9 +43,16 @@ MODEL_INPUT_DEPTH = 3
 FC_LAYER_SIZE = 1024
 
 # Helper: Save the model.
-checkpointer = ModelCheckpoint(
-    filepath='./output/checkpoints/inception.{epoch:03d}-{val_loss:.2f}.hdf5',
+checkpointer_dense = ModelCheckpoint(
+    filepath='./output/checkpoints/inception.dense.{epoch:03d}-{val_loss:.2f}.hdf5',
     verbose=1,
+    monitor='val_f1_score',
+    save_best_only=True)
+
+checkpointer_finetune = ModelCheckpoint(
+    filepath='./output/checkpoints/inception.finetune.{epoch:03d}-{val_loss:.2f}.hdf5',
+    verbose=1,
+    monitor='val_f1_score',
     save_best_only=True)
 
 # Helper: Stop when we stop learning.
@@ -55,7 +62,9 @@ early_stopper = EarlyStopping(patience=100)
 tensorboard = TensorBoard(log_dir='./output/events')
 
 # Helper: Keep track of acc and loss during training
-history = History()
+history_dense = History()
+
+history_finetune = History()
 
 
 def get_model(num_classes, weights='imagenet'):
@@ -218,10 +227,8 @@ def get_generators(image_dir, validation_pct=None):
 
 def main(dir=None, split=None):
 
-    os.makedirs('./output/checkpoints/', exist_ok=True)
-
     if dir == None:
-        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/train"
+        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/"
     else:
         IMAGES_DIR_PATH = dir
 
@@ -234,6 +241,8 @@ def main(dir=None, split=None):
 
     train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES = get_generators(IMAGES_DIR_PATH, VALIDATION_SPLIT)
 
+    os.makedirs('./output/checkpoints/', exist_ok=True)
+
     print("Training dense classifier from scratch")
     # Get and train the top layers.
     model = get_top_layer_model(model)
@@ -244,7 +253,7 @@ def main(dir=None, split=None):
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
         epochs=50,
         class_weight=class_weight,
-        callbacks=[])
+        callbacks=[checkpointer_dense, tensorboard, history_dense])
 
     print("Fine-tune InceptionV3, bottom layers frozen")
     # Get and train the mid layers.
@@ -256,21 +265,30 @@ def main(dir=None, split=None):
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
         epochs=300,
         class_weight=class_weight,
-        callbacks=[checkpointer, tensorboard, history])
+        callbacks=[checkpointer_finetune, tensorboard, history_finetune])
 
     # save model
     model.save('./output/model.hdf5', overwrite=True)
 
     # save metrics during training epochs
-    pd.DataFrame(history.history).to_csv("./output/history.csv")
+    pd.DataFrame(history_dense.history).to_csv("./output/history_classifier.csv")
+
+    pd.DataFrame(history_finetune.history).to_csv("./output/history_finetune.csv")
 
     # plot  metrics during training epochs
-    plt.plot(history.history['loss'], 'ro-', label='Train loss')
-    plt.plot(history.history['val_loss'], 'go-', label='Test loss')
+    plt.plot(history_dense.history['loss'], 'ro-', label='Train loss')
+    plt.plot(history_dense.history['val_loss'], 'go-', label='Test loss')
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
-    plt.savefig('./output/training_plot.png')
+    plt.savefig('./output/training_plot_classifier.png')
+
+    plt.plot(history_finetune.history['loss'], 'ro-', label='Train loss')
+    plt.plot(history_finetune.history['val_loss'], 'go-', label='Test loss')
+    plt.legend()
+    plt.xlabel('epoch')
+    plt.ylabel('loss')
+    plt.savefig('./output/training_plot_finetune.png')
 
     Test.main(IMAGES_DIR_PATH)
 

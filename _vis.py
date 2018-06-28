@@ -17,11 +17,36 @@ import _util
 '''
 
 
-def visualize_model_max_activations(model, img_shape=(299,299,3),  grad_step=1.0, grad_iter=20, save_all_filters=True, input_img=None):
+def visualize_model_max_activations(model, img_shape=(299,299,3),  grad_step=1.0, grad_iter=20, save_all_filters=True, img_placeholder=None):
+    """
+        Saves to file the maximum activations of all the filters of all convolutional layers in the model.
+        Performs gradient ascent in the image space wrt the loss.
+        Filters are ordered in descending order by loss (higher loss - better looking filter).
+
+        Parameters
+        ----------
+        model : keras model
+        img_shape : (width, height, h)
+        grad_step : float
+            step of gradient ascent
+        grad_iter : int
+            number of steps to perform gradient ascent
+        save_all_filters : bool
+            if 'False' discards the filters with negative gradient
+        img_placeholder : str
+            if 'None' the function uses a gray image input
+            if an image is given the function produces an output similar to 'Deep Dream'
+
+        Returns
+        -------
+        void
+            creates an image file "filters_[layer_name]_[nb_filters].png" containing the filters of each layer in model
+
+        """
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting maximum activations of layer ', layer.name)
-            visualize_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, save_all_filters, input_img)
+            visualize_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, save_all_filters, img_placeholder)
 
 
 def visualize_model_weights(model):
@@ -43,7 +68,8 @@ def visualize_model_activation_maps(model, img, color_map=None):
 '''
 
 
-def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), grad_step=1.0, grad_iter=100, save_all_filters=True, img=None):
+def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), grad_step=1.0, grad_iter=100,
+                                    save_all_filters=True, img_placeholder=None):
 
     (img_width, img_height, ch) = img_shape
 
@@ -79,16 +105,16 @@ def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), g
         iterate = K.function([input_img, K.learning_phase()], [loss, grads])
 
         # we start from a gray image with some random noise
-        if img is None:
+        if img_placeholder is None:
             input_img_data = np.random.random((1, img_width, img_height, ch))
             input_img_data = (input_img_data - 0.5) * 20 + 128
         else:
-            input_img_data = np.expand_dims(img, 0)
+            input_img_data = np.expand_dims(img_placeholder, 0)
 
         # we run gradient ascent for n steps
         for i in range(grad_iter):
             loss_value, grads_value = iterate([input_img_data])
-            input_img_data += grads_value * grad_step
+            input_img_data += grads_value * float(grad_step)
 
             print('Current loss value:', loss_value)
             if loss_value <= 0. and save_all_filters is False:
@@ -139,7 +165,7 @@ def visualize_layer_activation_maps(model, layer, img, color_map=None):
     grid_size = math.ceil(math.sqrt(nb_maps))
     feature_maps = activations[0, :, :, :]
     feature_maps_swap = np.swapaxes(feature_maps, -1, 0)
-    file_name = "activation_maps_" + layer.name
+    file_name = 'activation_maps_%s_%d' % (layer.name, nb_maps)
     _util.plot_to_grid(feature_maps_swap, file_name, grid_size=grid_size, color_map=color_map)
 
 
@@ -160,7 +186,7 @@ def visualize_class_activation_map(model, img, output_path):
     print("predictions", predictions)
     cam /= np.max(cam)
     cam_new = Image.Image.resize(cam, (height, width))
-    cam_new = Image.fromarray(np.uint8(cm.jet(cam_new) * 255))
+    cam_new = Image.fromarray(np.uint8(cm. jet(cam_new) * 255))
     cam_new.save(output_path)
 
 

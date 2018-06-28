@@ -28,26 +28,33 @@ def main(dir=None, n=None):
     x_test_glom = _util.get_n_samples(NB_SAMPLES, dir=DIR_GLOM, target_size=(299, 299))
     x_test_nonglom = _util.get_n_samples(NB_SAMPLES, dir=DIR_NONGLOM, target_size=(299, 299))
 
+    x_test_glom /= 255
+    x_test_nonglom /= 255
+
     # load model
     model = load_model('./output/model.hdf5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
 
-    model.summary()
+    #model.summary()
 
-    _util.plot_to_grid(x_test_glom, name='glomeruli_examples', grid_size=7)
+    _util.plot_to_grid(x_test_glom, name='glomeruli_examples')
 
-    _util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples', grid_size=7)
+    _util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples')
 
     # print('Those should be all ones - glom 1')
     y_test_glom = model.predict(x_test_glom)
+    TP = np.count_nonzero(y_test_glom >= 0.7)
+    print('True Positives ', TP)
 
     # print('Those should be all zeros - nonglom 0')
     y_test_nonglom = model.predict(x_test_nonglom)
+    TN = np.count_nonzero(y_test_nonglom <= 0.3)
+    print('True Negatives ', TN)
 
     # save activation maps
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
-    print('Glomeruli predicted as %d', y_test_glom[10][0])
+    print('Glomeruli probability %d', y_test_glom[10][0])
 
     _vis.visualize_model_max_activations(model)
 
