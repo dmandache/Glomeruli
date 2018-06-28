@@ -300,10 +300,14 @@ def main(dir=None, split=None):
     '''
     n = list(validation_generator)
 
-    x_test, y_true_test = zip(*n)
-    y_pred_test = model.predict(x_test)
+    y_true = []
+    y_pred = []
+    for x,y in validation_generator:
+        y_ = model.predict(x)
+        y_true.append(y)
+        y_pred.append(y_)
 
-    _util.confusion_matrix(y_true_test, y_pred_test)
+    _util.confusion_matrix(y_true, y_pred)
 
     Test.main(IMAGES_DIR_PATH)
 
