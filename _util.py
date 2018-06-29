@@ -117,3 +117,11 @@ def gaussian_blur(img, kernel=2):
     pil_img = Image.fromarray(np.uint8(img))
     pil_img = pil_img.filter(ImageFilter.GaussianBlur(radius=kernel))
     return pil_img
+
+def merge_history_dicts(d1, d2, epoch):
+    d2 = {key: {key_ + epoch: val_ for key_, val_ in val.items()}
+                 for key, val in d2.items()}
+
+    d = {key: (d1[key], d2[key]) for key in d2}
+
+    return d

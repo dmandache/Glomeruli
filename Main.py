@@ -6,7 +6,7 @@ import argparse
 import numpy as np
 import pandas as pd
 
-from keras.models import Model
+from keras.models import Model, load_model
 from keras import optimizers
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.applications.inception_v3 import InceptionV3
@@ -48,15 +48,8 @@ MODEL_INPUT_DEPTH = 3
 FC_LAYER_SIZE = 1024
 
 # Helper: Save the model.
-checkpointer_dense = ModelCheckpoint(
-    filepath='./output/checkpoints/inception.dense.{epoch:03d}-{val_f1_score:.3f}.hdf5',
-    verbose=1,
-    monitor='val_f1_score',
-    mode='max',
-    save_best_only=True)
-
-checkpointer_finetune = ModelCheckpoint(
-    filepath='./output/checkpoints/inception.finetune.{epoch:03d}-{val_f1_score:.3f}.hdf5',
+checkpointer = ModelCheckpoint(
+    filepath='./output/model.hdf5',
     verbose=1,
     monitor='val_f1_score',
     mode='max',
@@ -261,7 +254,9 @@ def main(dir=None, split=None):
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
         epochs=DENSE_TRAIN_EPOCHS,
         class_weight=class_weight,
-        callbacks=[checkpointer_dense, early_stopper_dense, tensorboard, history_dense])
+        callbacks=[checkpointer, early_stopper_dense, tensorboard, history_dense])
+
+    model = load_model('./output/model.hdf5')
 
     print("Fine-tune InceptionV3, bottom layers frozen")
     # Get and train the mid layers.
@@ -273,30 +268,50 @@ def main(dir=None, split=None):
         validation_steps=NUM_TEST_SAMPLES//BATCH_SIZE,
         epochs=FINE_TUNE_EPOCHS,
         class_weight=class_weight,
-        callbacks=[checkpointer_finetune, early_stopper_finetune, tensorboard, history_finetune])
+        callbacks=[checkpointer, early_stopper_finetune, tensorboard, history_finetune])
 
     # save model
-    model.save('./output/model.hdf5', overwrite=True)
+    #model.save('./output/model.hdf5', overwrite=True)
 
     # save metrics during training epochs
     pd.DataFrame(history_dense.history).to_csv("./output/history_classifier.csv")
-
     pd.DataFrame(history_finetune.history).to_csv("./output/history_finetune.csv")
 
+    fine_tune_epoch = len(history_dense.history['loss'])
+    print('Epoch when fine-tuning starts: %d' % fine_tune_epoch)
+
+    '''
+    dict_data = {key: {key_ + fine_tune_epoch : val_ for key_, val_ in val.items()}
+                 for key, val in dict_data.items()}
+                 
+    finaldict = {key:(dict1[key], dict2[key]) for key in dict1}
+    '''
+    history = _util.merge_history_dicts(history_dense.history, history_finetune.history, fine_tune_epoch)
+
+    '''
     # plot  metrics during training epochs
-    plt.plot(history_dense.history['loss'], 'ro-', label='Train loss')
-    plt.plot(history_dense.history['val_loss'], 'go-', label='Test loss')
+    plt.style.use('seaborn-notebook')
+    plt.plot(history_dense.history['loss'], 'go-', label='Train loss')
+    plt.plot(history_dense.history['val_loss'], 'ro-', label='Test loss')
+    plt.plot(history_dense.history['acc'], 'g*-', label='Train acc')
+    plt.plot(history_dense.history['val_acc'], 'r*-', label='Test acc')
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot_classifier.png')
+    '''
 
-    plt.plot(history_finetune.history['loss'], 'ro-', label='Train loss')
-    plt.plot(history_finetune.history['val_loss'], 'go-', label='Test loss')
+    plt.style.use('seaborn-notebook')
+    plt.plot(history['loss'], 'go-', label='Train loss')
+    plt.plot(history['val_loss'], 'ro-', label='Test loss')
+    plt.plot(history['acc'], 'g*-', label='Train acc')
+    plt.plot(history['val_acc'], 'r*-', label='Test acc')
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
-    plt.savefig('./output/training_plot_finetune.png')
+    plt.savefig('./output/training_plot.png')
+
+
 
     Test.main(IMAGES_DIR_PATH)
 
