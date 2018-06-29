@@ -37,9 +37,11 @@ def main(dir=None, n=None):
 
     #model.summary()
 
-    _util.plot_to_grid(x_test_glom, name='glomeruli_examples')
+    glomeruli_examples = _util.plot_to_grid(x_test_glom)
+    imsave('./output/%s.png' % 'glomeruli_examples', glomeruli_examples)
 
-    _util.plot_to_grid(x_test_nonglom, name='non-glomeruli_examples')
+    non_glomeruli_examples = _util.plot_to_grid(x_test_nonglom)
+    imsave('./output/%s.png' % 'non_glomeruli_examples', non_glomeruli_examples)
 
     # print('Those should be all ones - glom 1')
     y_test_glom = model.predict(x_test_glom)
@@ -58,11 +60,12 @@ def main(dir=None, n=None):
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli probability %d', y_test_glom[10][0])
 
+    _vis.visualize_model_max_activations(model, grad_iter=20)
+
     _vis.visualize_model_weights(model)
 
-    _vis.visualize_model_activation_maps(model, img_input, color_map='jet')
+    _vis.visualize_model_activation_maps(model, img_input)
 
-    _vis.visualize_model_max_activations(model, grad_iter=100)
 
 
 if __name__ == '__main__':

@@ -121,7 +121,7 @@ def get_mid_layer_model(model):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    model.compile(optimizer=optimizers.SGD(lr=0.0001, momentum=0.9, decay=1e-6),
+    model.compile(optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=1e-6),
                   loss='binary_crossentropy',
                   metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 

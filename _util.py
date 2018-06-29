@@ -2,8 +2,7 @@ import os
 import random
 import math
 import numpy as np
-from PIL import Image
-from scipy.misc import imsave
+from PIL import Image, ImageFilter
 import pandas as pd
 
 import matplotlib
@@ -11,6 +10,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from matplotlib import cm
 
+# doesn't work
 def confusion_matrix(y_test, y_pred):
     raw_data = {'actual': y_test,
                 'preds': y_pred}
@@ -20,11 +20,13 @@ def confusion_matrix(y_test, y_pred):
     with open("confusion-matrix.txt", "w") as text_file:
         text_file.write(tab.to_string())
 
+
 def get_output_layer(model, layer_name):
     # get the symbolic outputs of each "key" layer (we gave them unique names).
     layer_dict = dict([(layer.name, layer) for layer in model.layers])
     layer = layer_dict[layer_name]
     return layer
+
 
 def get_n_samples(n=32, dir=None, target_size=(299,299)):
     samples = []
@@ -50,7 +52,8 @@ def get_n_samples(n=32, dir=None, target_size=(299,299)):
     #samples = np.expand_dims(samples, axis=3)
     return samples
 
-def plot_to_grid(batch, name='images', grid_size=None, random=False, color_map=None):
+
+def plot_to_grid(batch, grid_size=None, random=False):
 
     img_size = batch[0].shape[0]
 
@@ -97,16 +100,20 @@ def plot_to_grid(batch, name='images', grid_size=None, random=False, color_map=N
             img = kept_patches[i * grid_size + j]
             if ch == 1:
                 stitched_images[(img_size + margin) * i: (img_size + margin) * i + img_size,
-                (img_size + margin) * j: (img_size + margin) * j + img_size] = img
+                                (img_size + margin) * j: (img_size + margin) * j + img_size] = img
             else:
                 stitched_images[(img_size + margin) * i: (img_size + margin) * i + img_size,
                                 (img_size + margin) * j: (img_size + margin) * j + img_size, ] = img
+    return stitched_images
 
-    # save the result to disk
-    # imsave('./patches_%s_%d-%d.png' % (name, n, nt), stitched_patches)
-    if color_map:
-        stitched_images /= np.max(stitched_images)
-        stitched_images = Image.fromarray(np.uint8(cm.jet(stitched_images) * 255))
-        name += '_jet'
-    imsave('./output/%s.png' % name, stitched_images)
 
+def apply_jet_colormap(img):
+    img /= np.max(img)
+    img = Image.fromarray(np.uint8(cm.jet(img) * 255))
+    return img
+
+
+def gaussian_blur(img, kernel=2):
+    pil_img = Image.fromarray(np.uint8(img))
+    pil_img = pil_img.filter(ImageFilter.GaussianBlur(radius=kernel))
+    return pil_img

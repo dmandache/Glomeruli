@@ -1,8 +1,10 @@
 from keras import backend as K
 from PIL import Image
+from scipy.misc import imsave
 import numpy as np
 import math
 import time
+import os
 
 import matplotlib
 matplotlib.use('Agg')
@@ -43,6 +45,7 @@ def visualize_model_max_activations(model, img_shape=(299,299,3),  grad_step=1.0
             creates an image file "filters_[layer_name]_[nb_filters].png" containing the filters of each layer in model
 
         """
+    os.makedirs('./output/filters/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting maximum activations of layer ', layer.name)
@@ -50,6 +53,7 @@ def visualize_model_max_activations(model, img_shape=(299,299,3),  grad_step=1.0
 
 
 def visualize_model_weights(model):
+    os.makedirs('./output/weights/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting weights of layer ', layer.name)
@@ -57,6 +61,7 @@ def visualize_model_weights(model):
 
 
 def visualize_model_activation_maps(model, img, color_map=None):
+    os.makedirs('./output/activation_maps/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting activation maps of layer ', layer.name)
@@ -69,13 +74,12 @@ def visualize_model_activation_maps(model, img, color_map=None):
 
 
 def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), grad_step=1.0, grad_iter=100,
-                                    save_all_filters=True, img_placeholder=None):
+                                    save_all_filters=True, sort_descending_loss=False, img_placeholder=None):
 
     (img_width, img_height, ch) = img_shape
 
     weights = layer.get_weights()[0]
     nb_filters = weights.shape[-1]
-    grid_size = math.ceil(math.sqrt(nb_filters))
 
     input_img = model_input
 
@@ -116,7 +120,8 @@ def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), g
             loss_value, grads_value = iterate([input_img_data])
             input_img_data += grads_value * float(grad_step)
 
-            print('Current loss value:', loss_value)
+            #print('Current loss value:', loss_value)
+
             if loss_value <= 0. and save_all_filters is False:
                 # some filters get stuck to 0, we can skip them
                 break
@@ -129,16 +134,20 @@ def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), g
         print('Filter %d processed in %ds' % (filter_index, end_time - start_time))
 
     # the filters that have the highest loss are assumed to be better-looking.
-    kept_filters.sort(key=lambda x: x[1], reverse=True)
+    if sort_descending_loss:
+        kept_filters.sort(key=lambda x: x[1], reverse=True)
 
     # unzip filters and their losses
     filters, losses = zip(*kept_filters)
     filters = list(filters)
 
-    file_name = 'filters_%s_%d' % (layer.name, nb_filters)
+    file_name = '%s_%d' % (layer.name, nb_filters)
 
     # save to file
-    _util.plot_to_grid(filters, file_name, grid_size)
+    filters_img = _util.plot_to_grid(filters)
+    filters_img = _util.gaussian_blur(filters_img)
+
+    imsave('./output/filters/%s.png' % file_name, filters_img)
 
 
 def visualize_layer_weights(layer):
@@ -147,15 +156,15 @@ def visualize_layer_weights(layer):
     width, height, nb_filters = weights.shape
     # only plot square conv filters
     if width == height:
-        grid_size = math.ceil(math.sqrt(nb_filters))
-        filters = np.swapaxes(weights, -1, 0)
-        file_name = 'weights_%s_%d' % (layer.name, nb_filters)
-        _util.plot_to_grid(filters, file_name, grid_size=grid_size)
+        filter_weights = np.swapaxes(weights, -1, 0)
+        file_name = '%s_%d' % (layer.name, nb_filters)
+        filter_weights_img = _util.plot_to_grid(filter_weights)
+        imsave('./output/weights/%s.png' % file_name, filter_weights_img)
     else:
-        print('Skipping layer %s with conv filters of size %d x %d', (layer.name, width, height))
+        print('Skipping layer %s with conv filters of size %d x %d' (layer.name, width, height))
 
 
-def visualize_layer_activation_maps(model, layer, img, color_map=None):
+def visualize_layer_activation_maps(model, layer, img, color_map=False):
 
     get_activations = K.function([model.layers[0].input, K.learning_phase()], [layer.output, ])
     activations = get_activations([img, 0])[0]
@@ -166,13 +175,17 @@ def visualize_layer_activation_maps(model, layer, img, color_map=None):
 
     print(activations.shape)
     nb_maps = activations.shape[-1]
-    grid_size = math.ceil(math.sqrt(nb_maps))
     feature_maps = activations[0, :, :, :]
     feature_maps_swap = np.swapaxes(feature_maps, -1, 0)
-    file_name = 'activation_maps_%s_%d' % (layer.name, nb_maps)
-    _util.plot_to_grid(feature_maps_swap, file_name, grid_size=grid_size, color_map=color_map)
+    file_name = '%s_%d' % (layer.name, nb_maps)
+    maps_img = _util.plot_to_grid(feature_maps_swap)
+    if color_map:
+        maps_img = _util.apply_jet_colormap(maps_img)
+        file_name += '_jet'
+    imsave('./output/activation_maps/%s.png' % file_name, maps_img)
 
 
+# doesn't work
 def visualize_class_activation_map(model, img, output_path):
     _, width, height, ch = img.shape
 
