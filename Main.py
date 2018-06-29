@@ -242,8 +242,6 @@ def main(dir=None, split=None):
 
     train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES = get_generators(IMAGES_DIR_PATH, VALIDATION_SPLIT)
 
-    os.makedirs('./output/checkpoints/', exist_ok=True)
-
     print("Training dense classifier from scratch")
     # Get and train the top layers.
     model = get_top_layer_model(model)
@@ -256,7 +254,9 @@ def main(dir=None, split=None):
         class_weight=class_weight,
         callbacks=[checkpointer, early_stopper_dense, tensorboard, history_dense])
 
-    model = load_model('./output/model.hdf5')
+    model = load_model('./output/model.hdf5',
+                       custom_objects={'sensitivity': MyMetrics.sensitivity, 'specificity': MyMetrics.specificity,
+                                       'f1_score': MyMetrics.f1_score})
 
     print("Fine-tune InceptionV3, bottom layers frozen")
     # Get and train the mid layers.
@@ -310,8 +310,6 @@ def main(dir=None, split=None):
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot.png')
-
-
 
     Test.main(IMAGES_DIR_PATH)
 
