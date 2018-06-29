@@ -58,7 +58,7 @@ def main(dir=None, n=None):
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
-    print('Glomeruli probability %d', y_test_glom[10][0])
+    print('Glomeruli probability {} = ' .format(y_test_glom[10][0]))
 
     _vis.visualize_model_max_activations(model, grad_iter=20)
 

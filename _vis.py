@@ -131,7 +131,7 @@ def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), g
             img = deprocess_image(input_img_data[0])
             kept_filters.append((img, loss_value))
         end_time = time.time()
-        print('Filter %d processed in %ds' % (filter_index, end_time - start_time))
+        # print('Filter %d processed in %ds' % (filter_index, end_time - start_time))
 
     # the filters that have the highest loss are assumed to be better-looking.
     if sort_descending_loss:
@@ -210,6 +210,7 @@ def visualize_class_activation_map(model, img, output_path):
 '''
     Utility functions
 '''
+
 
 # util function to convert a tensor into a valid image
 def deprocess_image(x):
