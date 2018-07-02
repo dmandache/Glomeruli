@@ -86,14 +86,14 @@ def train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NU
 
 def train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES ):
 
-    model = MyModel.get_model(input_shape=(None,None,None,3), num_classes=1)
+    model = MyModel.get_model(settings.NUM_CLASSES)
 
     model.fit_generator(
         train_generator,
         steps_per_epoch=NUM_TRAIN_SAMPLES // settings.BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES // settings.BATCH_SIZE,
-        epochs=settings.DENSE_TRAIN_EPOCHS,
+        epochs=settings.FINE_TUNE_EPOCHS,
         class_weight=settings.class_weight,
         callbacks=[checkpointer, early_stopper, tensorboard, history])
 
