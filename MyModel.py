@@ -7,6 +7,7 @@ import MyMetrics
 import settings
 settings.init_globals()
 
+# with img size (288, 288, 3) it has 7.6M parameters
 def get_model(num_classes=1):
     """
         Build a basic CNN with 4 convolutional blocks = 8 convolutonal layers
@@ -88,10 +89,10 @@ def get_model(num_classes=1):
         Adam optimization algo
             amsgrad=True - ON THE CONVERGENCE OF ADAM AND BEYOND - https://openreview.net/pdf?id=ryQu7f-RZ
     '''
-    adam = optimizers.Adam(lr=0.001, decay=1e-6, amsgrad=True)
+    adam = optimizers.Adam(lr=0.001, decay=1e-6, amsgrad=False)
     rmsprop = optimizers.RMSprop(lr=0.001, decay=1e-5)
 
-    model.compile(optimizer=rmsprop, loss=loss_function,
+    model.compile(optimizer=adam, loss=loss_function,
                   metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 
     return model

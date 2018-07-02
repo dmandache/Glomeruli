@@ -1,16 +1,8 @@
 """Train model using transfer learning."""
-import os
-import shutil
 import argparse
-
-import numpy as np
 import pandas as pd
 
-from keras.models import Model, load_model
-from keras import optimizers
-from keras.layers import Dense, GlobalAveragePooling2D
-from keras.applications.inception_v3 import InceptionV3
-from keras.preprocessing.image import ImageDataGenerator
+from keras.models import load_model
 from keras.callbacks import ModelCheckpoint, TensorBoard, EarlyStopping, History
 from keras.utils import multi_gpu_model
 
@@ -23,7 +15,6 @@ import MyInception
 from  MyMetrics import sensitivity, specificity, f1_score
 import Data
 import Test
-import _util
 
 import settings
 settings.init_globals()
@@ -37,7 +28,7 @@ checkpointer = ModelCheckpoint(
     save_best_only=True)
 
 # Helper: Stop when we stop learning.
-early_stopper = EarlyStopping(patience=50)
+early_stopper = EarlyStopping(patience=100)
 
 # Helper: TensorBoard
 tensorboard = TensorBoard(log_dir='./output/events')
@@ -52,6 +43,9 @@ def train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NU
     print("Training dense classifier from scratch")
     # Get and train the top layers.
     model = MyInception.get_top_layer_model(model)
+
+    model.summary()
+
     model.fit_generator(
         train_generator,
         steps_per_epoch=NUM_TRAIN_SAMPLES // settings.BATCH_SIZE,
