@@ -122,6 +122,8 @@ def main(dir=None, split=None):
 
     model = train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES)
 
+    model.summary()
+
     # save metrics during training epochs
     pd.DataFrame(history.history).to_csv("./output/history.csv")
 

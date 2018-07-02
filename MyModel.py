@@ -1,5 +1,6 @@
-from keras.models import Sequential, load_model
+from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Activation, Flatten
+from keras import optimizers
 from keras import backend as K
 import MyMetrics
 
@@ -83,7 +84,13 @@ def get_model(num_classes=1):
     else:
         loss_function = 'categorical_crossentropy'
 
-    model.compile(optimizer='adam', loss=loss_function,
-                    metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
+    '''
+        Adam optimization algo
+            amsgrad - ON THE CONVERGENCE OF ADAM AND BEYOND - https://openreview.net/pdf?id=ryQu7f-RZ
+    '''
+    adam = optimizers.Adam(lr=0.001, decay=1e-6, amsgrad=True)
+
+    model.compile(optimizer=adam, loss=loss_function,
+                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 
     return model
