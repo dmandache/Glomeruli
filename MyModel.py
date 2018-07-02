@@ -63,9 +63,9 @@ def get_model(num_classes=1):
     '''
             4th convolutional block 64 x 2 filters 3x3, maxpooling 2x2, dropout 25%
     '''
-    model.add(Conv2D(64, (3, 3), border_mode='same'))
+    model.add(Conv2D(128, (3, 3), border_mode='same'))
     model.add(Activation('relu'))
-    model.add(Conv2D(64, (3, 3)))
+    model.add(Conv2D(128, (3, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
@@ -74,7 +74,7 @@ def get_model(num_classes=1):
             Classifier : fully connected layer 512 neurons, dropout 50%
     '''
     model.add(Flatten())
-    model.add(Dense(512, init='glorot_uniform'))
+    model.add(Dense(1024, init='glorot_uniform'))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
     model.add(Dense(num_classes, init='glorot_uniform'))
