@@ -1,6 +1,6 @@
 from keras.models import Sequential, load_model
 from keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Activation, Flatten
-
+from keras import backend as K
 import MyMetrics
 
 import settings
@@ -21,13 +21,17 @@ def get_model(num_classes=1):
         model
 
     """
-    input_shape = (settings.BATCH_SIZE, settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT, settings.MODEL_INPUT_DEPTH)
+    if K.image_data_format() == 'channels_first':
+        input_shape = (settings.MODEL_INPUT_DEPTH, settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT)
+    else:
+        input_shape = (settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT, settings.MODEL_INPUT_DEPTH)
+
     model = Sequential()
 
     '''
             First convolutional block 32 x 2 filters 7x7, maxpooling 2x2, dropout 25%
     '''
-    model.add(Conv2D(32, (7, 7), border_mode='same', input_shape=(None, None, 3)))
+    model.add(Conv2D(32, (7, 7), border_mode='same', input_shape=input_shape))
     model.add(Activation('relu'))
     model.add(Conv2D(32, (7, 7)))
     model.add(Activation('relu'))
@@ -75,9 +79,9 @@ def get_model(num_classes=1):
     model.add(Activation('sigmoid'))
 
     if num_classes is 1:
-        loss_function = 'categorical_crossentropy'
-    else:
         loss_function = 'binary_crossentropy'
+    else:
+        loss_function = 'categorical_crossentropy'
 
     model.compile(optimizer='adam', loss=loss_function,
                     metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
