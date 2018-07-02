@@ -10,7 +10,7 @@ def init_globals():
                     class_dict['glomeruli']: 5}  # 1 : 25
 
     DENSE_TRAIN_EPOCHS = 30
-    FINE_TUNE_EPOCHS = 300
+    FINE_TUNE_EPOCHS = 500
 
     NUM_CLASSES = 1
     RANDOM_SEED = None
