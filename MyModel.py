@@ -27,7 +27,7 @@ def get_model(num_classes=1):
     '''
             First convolutional block 32 x 2 filters 7x7, maxpooling 2x2, dropout 25%
     '''
-    model.add(Conv2D(32, (7, 7), border_mode='same', input_shape=input_shape))
+    model.add(Conv2D(32, (7, 7), border_mode='same', input_shape=(None, None, 3)))
     model.add(Activation('relu'))
     model.add(Conv2D(32, (7, 7)))
     model.add(Activation('relu'))
