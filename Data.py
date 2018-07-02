@@ -12,6 +12,7 @@ def get_generators(image_dir, validation_pct=None):
     train_data_gen_args = dict(rescale=1. / 255,
                                featurewise_center=True,
                                featurewise_std_normalization=True,
+                               zca_whitening=True,
                                rotation_range=180,
                                width_shift_range=0.2,
                                height_shift_range=0.2,
@@ -20,7 +21,8 @@ def get_generators(image_dir, validation_pct=None):
 
     test_data_gen_args = dict(rescale=1. / 255,
                               featurewise_center=True,
-                              featurewise_std_normalization=True)
+                              featurewise_std_normalization=True,
+                              zca_whitening=True,)
 
     if validation_pct is None:
         DIR_TRAIN_GLOM = image_dir + "/train/glomeruli"
@@ -113,11 +115,13 @@ def get_generators(image_dir, validation_pct=None):
             class_mode=settings.CLASS_MODE,
             seed=settings.RANDOM_SEED)
 
-        # modify global variables if necessary
+        train_datagen.fit()
 
+        '''
+            modify global variables if necessary: class label association, class weight matrix respectively
+        '''
         settings.class_dict = train_generator.class2id
         print("label mapping is : ", settings.class_dict)
-
         settings.class_weight = {settings.class_dict['nonglomeruli']: 1,  # 0 : 1
                                  settings.class_dict['glomeruli']: 25}  # 1 : 25
         print("class weighting is : ", settings.class_weight)
