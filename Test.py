@@ -46,13 +46,13 @@ def main(dir=None, n=None):
     # print('Those should be all ones - glom 1')
     y_test_glom = model.predict(x_test_glom)
     y_true_glom = list(np.ones(len(y_test_glom)))
-    TP = np.count_nonzero(y_test_glom >= 0.7)
+    TP = np.count_nonzero(y_test_glom >= 0.6)
     print('True Positives ', TP)
 
     # print('Those should be all zeros - nonglom 0')
     y_test_nonglom = model.predict(x_test_nonglom)
     y_true_nonglom = list(np.zeros(len(y_test_nonglom)))
-    TN = np.count_nonzero(y_test_nonglom <= 0.3)
+    TN = np.count_nonzero(y_test_nonglom <= 0.4)
     print('True Negatives ', TN)
 
     img = x_test_glom[10, :, :, :]
