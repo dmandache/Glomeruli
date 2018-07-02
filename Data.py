@@ -8,13 +8,20 @@ import settings
 settings.init_globals()
 
 def get_generators(image_dir, validation_pct=None):
-    #global class_dict, class_weight
-    #global MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT, BATCH_SIZE, CLASS_MODE, RANDOM_SEED
 
     train_data_gen_args = dict(rescale=1. / 255,
-                               rotation_range=90)
+                               featurewise_center=True,
+                               featurewise_std_normalization=True,
+                               rotation_range=180,
+                               width_shift_range=0.2,
+                               height_shift_range=0.2,
+                               horizontal_flip=True,
+                               fill_mode='reflect',
+                               save_to_dir='./output/augmented_data')
 
-    test_data_gen_args = dict(rescale=1. / 255)
+    test_data_gen_args = dict(rescale=1. / 255,
+                              featurewise_center=True,
+                              featurewise_std_normalization=True)
 
     if validation_pct is None:
         DIR_TRAIN_GLOM = image_dir + "/train/glomeruli"
@@ -65,6 +72,11 @@ def get_generators(image_dir, validation_pct=None):
             target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT),
             batch_size=settings.BATCH_SIZE,
             class_mode=settings.CLASS_MODE)
+
+        test_datagen.fit(train_generator, nb_iter=100)
+
+        train_datagen.fit_generator(train_generator, nb_iter=100)
+
     else:
 
         image_lists = FlyGenerator.create_image_lists(image_dir, validation_pct)
