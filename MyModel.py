@@ -89,7 +89,7 @@ def get_model(num_classes=1):
         Adam optimization algo
             amsgrad=True - ON THE CONVERGENCE OF ADAM AND BEYOND - https://openreview.net/pdf?id=ryQu7f-RZ
     '''
-    adam = optimizers.Adam(lr=0.001, decay=1e-6, amsgrad=False)
+    adam = optimizers.Adam(lr=0.01, decay=1e-4, amsgrad=False)
     rmsprop = optimizers.RMSprop(lr=0.001, decay=1e-5)
 
     model.compile(optimizer=adam, loss=loss_function,

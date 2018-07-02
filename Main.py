@@ -99,7 +99,6 @@ def train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_
     return model
 
 
-
 def main(dir=None, split=None):
 
     if dir == None:
