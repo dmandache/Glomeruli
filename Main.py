@@ -88,6 +88,8 @@ def train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_
 
     model = MyModel.get_model(settings.NUM_CLASSES)
 
+    model.summary()
+
     model.fit_generator(
         train_generator,
         steps_per_epoch=NUM_TRAIN_SAMPLES // settings.BATCH_SIZE,
@@ -121,8 +123,6 @@ def main(dir=None, split=None):
     #model = train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES)
 
     model = train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES)
-
-    model.summary()
 
     # save metrics during training epochs
     pd.DataFrame(history.history).to_csv("./output/history.csv")
