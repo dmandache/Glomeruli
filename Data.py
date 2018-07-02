@@ -115,8 +115,6 @@ def get_generators(image_dir, validation_pct=None):
             class_mode=settings.CLASS_MODE,
             seed=settings.RANDOM_SEED)
 
-        train_datagen.fit()
-
         '''
             modify global variables if necessary: class label association, class weight matrix respectively
         '''
