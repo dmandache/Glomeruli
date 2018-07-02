@@ -89,8 +89,9 @@ def get_model(num_classes=1):
             amsgrad=True - ON THE CONVERGENCE OF ADAM AND BEYOND - https://openreview.net/pdf?id=ryQu7f-RZ
     '''
     adam = optimizers.Adam(lr=0.001, decay=1e-6, amsgrad=True)
+    rmsprop = optimizers.RMSprop(lr=0.001, decay=1e-5)
 
-    model.compile(optimizer='rmsprop', loss=loss_function,
+    model.compile(optimizer=rmsprop, loss=loss_function,
                   metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 
     return model
