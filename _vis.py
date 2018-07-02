@@ -44,7 +44,7 @@ def visualize_model_max_activations(model, img_shape=(299,299,3),  grad_step=1.0
         void
             creates an image file "filters_[layer_name]_[nb_filters].png" containing the filters of each layer in model
 
-        """
+    """
     os.makedirs('./output/filters/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
