@@ -1,11 +1,19 @@
+from keras.models import Model
+from keras import optimizers
+from keras.layers import Dense, GlobalAveragePooling2D
+from keras.applications.inception_v3 import InceptionV3
 
+import MyMetrics
 
 TRAINABLE_LAYERS = 172
+
 INCEPTIONV3_BASE_LAYERS = len(InceptionV3(weights=None, include_top=False).layers)
 INCEPTIONV3_ALL_LAYERS = len(InceptionV3(weights=None, include_top=True).layers)
 
+FC_LAYER_SIZE = 1024
 
 def get_model(num_classes, weights='imagenet'):
+
     # create the base pre-trained model
     # , input_tensor=input_tensor
 
@@ -56,3 +64,4 @@ def get_mid_layer_model(model):
                   metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
 
     return model
+
