@@ -17,8 +17,8 @@ def init_globals():
     CLASS_MODE = 'binary'
 
     # we chose to train the top 2 inception blocks
-    BATCH_SIZE = 128
+    BATCH_SIZE = 64
 
-    MODEL_INPUT_WIDTH = 368
-    MODEL_INPUT_HEIGHT = 368
+    MODEL_INPUT_WIDTH = 288
+    MODEL_INPUT_HEIGHT = 288
     MODEL_INPUT_DEPTH = 3
