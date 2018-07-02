@@ -16,8 +16,7 @@ def get_generators(image_dir, validation_pct=None):
                                width_shift_range=0.2,
                                height_shift_range=0.2,
                                horizontal_flip=True,
-                               fill_mode='reflect',
-                               save_to_dir='./output/augmented_data')
+                               fill_mode='reflect')
 
     test_data_gen_args = dict(rescale=1. / 255,
                               featurewise_center=True,
@@ -99,6 +98,7 @@ def get_generators(image_dir, validation_pct=None):
             image_lists=image_lists,
             category='training',
             image_dir=image_dir,
+            save_to_dir='./output/augmented_data',
             target_size=(settings.MODEL_INPUT_HEIGHT, settings.MODEL_INPUT_WIDTH),
             batch_size=settings.BATCH_SIZE,
             class_mode=settings.CLASS_MODE,
