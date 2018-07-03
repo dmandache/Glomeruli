@@ -1,11 +1,12 @@
 import os
-
+import shutil
+import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 
 import FlyGenerator
-
 import settings
 settings.init_globals()
+
 
 def get_generators(image_dir, validation_pct=None):
 
@@ -100,7 +101,7 @@ def get_generators(image_dir, validation_pct=None):
             image_lists=image_lists,
             category='training',
             image_dir=image_dir,
-            save_to_dir='./output/augmented_data',
+            #save_to_dir='./output/augmented_data',
             target_size=(settings.MODEL_INPUT_HEIGHT, settings.MODEL_INPUT_WIDTH),
             batch_size=settings.BATCH_SIZE,
             class_mode=settings.CLASS_MODE,
@@ -125,3 +126,72 @@ def get_generators(image_dir, validation_pct=None):
         print("class weighting is : ", settings.class_weight)
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
+
+
+def gen_from_folders(image_dir):
+    """
+        Generate image batches from train and test subdirectories
+
+    :param image_dir:
+    :return:
+    """
+    pass
+
+
+def gen_from_image_lists(image_dir, validation_pct=20):
+    """
+        Generate image batches for training and validation without physically splitting it on disk
+
+    :param image_dir:
+    :param validation_pct: integer between (0, 100)
+    :return:
+    """
+    pass
+
+
+def split_data_train_test_folders(image_dir, validation_pct=20):
+    """
+        Create train and test subdirectories for every class folder found in image_dir
+
+    :param image_dir: folder with data spit in classes
+    :param validation_pct: integer between (0, 100)
+    :return:
+
+        +---image_dir
+        |   \---glomeruli
+        |   \---nonglomeruli
+        |   +---split
+        |   |   +---train
+        |   |       \---glomeruli
+        |   |       \---nonglomeruli
+        |   |   +---test
+        |   |       \---glomeruli
+        |   |       \---nonglomeruli
+
+    """
+    validation_pct /= 100           # validation_pct in interval (0, 1)
+
+    # folders with unsplit data
+    DIR_GLOM = image_dir + "/glomeruli"
+    DIR_NONGLOM = image_dir + "/nonglomeruli"
+
+    # folders with split data
+    DIR_TRAIN_GLOM = image_dir + "split/train/glomeruli"
+    DIR_TEST_GLOM = image_dir + "split/test/glomeruli"
+    DIR_TRAIN_NONGLOM = image_dir + "split/train/nonglomeruli"
+    DIR_TEST_NONGLOM = image_dir + "split/test/nonglomeruli"
+
+    files_glom = os.listdir(DIR_GLOM)
+    files_nonglom = os.listdir(DIR_NONGLOM)
+
+    for f in files_glom:
+        if np.random.rand(1) < validation_pct:
+            shutil.copy(DIR_GLOM + '/' + f, DIR_TEST_GLOM + '/' + f)
+        else:
+            shutil.copy(DIR_GLOM + '/' + f, DIR_TRAIN_GLOM + '/' + f)
+
+    for f in files_nonglom:
+        if np.random.rand(1) < validation_pct:
+            shutil.copy(DIR_NONGLOM + '/' + f, DIR_TEST_NONGLOM + '/' + f)
+        else:
+            shutil.copy(DIR_NONGLOM + '/' + f, DIR_TRAIN_NONGLOM + '/' + f)
