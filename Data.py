@@ -5,7 +5,7 @@ from keras.preprocessing.image import ImageDataGenerator
 
 import FlyGenerator
 import settings
-settings.init_globals()
+settings.init()
 
 train_data_gen_args = dict(rescale=1. / 255,
                             featurewise_center=True,
