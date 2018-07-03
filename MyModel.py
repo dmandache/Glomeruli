@@ -43,9 +43,9 @@ def get_model(num_classes=1):
     '''
             Second convolutional block 32 x 2 filters 5x5, maxpooling 2x2, dropout 25%
     '''
-    model.add(Conv2D(64, (5, 5), border_mode='same'))
+    model.add(Conv2D(32, (5, 5), border_mode='same'))
     model.add(Activation('relu'))
-    model.add(Conv2D(64, (5, 5)))
+    model.add(Conv2D(32, (5, 5)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
@@ -53,9 +53,9 @@ def get_model(num_classes=1):
     '''
             Third convolutional block 64 x 2 filters 3x3, maxpooling 2x2, dropout 25%
     '''
-    model.add(Conv2D(128, (3, 3), border_mode='same'))
+    model.add(Conv2D(32, (3, 3), border_mode='same'))
     model.add(Activation('relu'))
-    model.add(Conv2D(128, (3, 3)))
+    model.add(Conv2D(32, (3, 3)))
     model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
     model.add(Dropout(0.25))
