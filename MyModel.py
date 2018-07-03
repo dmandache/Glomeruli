@@ -2,7 +2,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Activation, Flatten
 from keras import optimizers
 from keras import backend as K
-import MyMetrics
+from  MyMetrics import precision, recall, sensitivity, specificity, f1_score
 
 import settings
 settings.init()
@@ -79,7 +79,7 @@ def get_model(num_classes=1):
     model.add(Flatten())
     model.add(Dense(1024, init='glorot_uniform'))
     model.add(Activation('relu'))
-    model.add(Dropout(0.5))
+    model.add(Dropout(0.25))
     model.add(Dense(num_classes, init='glorot_uniform'))
     model.add(Activation('sigmoid'))
 
@@ -92,10 +92,10 @@ def get_model(num_classes=1):
         Adam optimization algo
             amsgrad=True - ON THE CONVERGENCE OF ADAM AND BEYOND - https://openreview.net/pdf?id=ryQu7f-RZ
     '''
-    adam = optimizers.Adam(lr=0.01, decay=1e-4, amsgrad=False)
+    adam = optimizers.Adam(lr=0.0001, decay=1e-6, amsgrad=False)
     rmsprop = optimizers.RMSprop(lr=0.001, decay=1e-5)
 
     model.compile(optimizer=adam, loss=loss_function,
-                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
+                  metrics=['accuracy', precision, recall, sensitivity, specificity, f1_score])
 
     return model

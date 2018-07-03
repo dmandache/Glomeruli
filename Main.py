@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 
 import MyModel
 import MyInception
-from  MyMetrics import sensitivity, specificity, f1_score
+from  MyMetrics import precision, recall, sensitivity, specificity, f1_score
 import Data
 import Test
 
@@ -93,7 +93,7 @@ def train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_
         callbacks=[checkpointer, early_stopper, tensorboard, history])
 
     model = load_model('./output/model.hdf5',
-                       custom_objects={'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects={'precision': precision,'recall': recall, 'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
 
     return model
 

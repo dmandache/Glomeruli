@@ -79,7 +79,7 @@ def gen_from_image_lists(image_dir, validation_pct=20):
     settings.class_dict = train_generator.class2id
     print("label mapping is : ", settings.class_dict)
     settings.class_weight = {settings.class_dict['nonglomeruli']: 1,  # 0 : 1
-                             settings.class_dict['glomeruli']: 25}  # 1 : 25
+                             settings.class_dict['glomeruli']: settings.weight_glom}  # 1 : 25
     print("class weighting is : ", settings.class_weight)
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
