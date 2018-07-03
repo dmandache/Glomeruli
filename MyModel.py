@@ -5,7 +5,7 @@ from keras import backend as K
 import MyMetrics
 
 import settings
-settings.init_globals()
+settings.init()
 
 # with img size (288, 288, 3) it has 7.6M parameters
 def get_model(num_classes=1):
