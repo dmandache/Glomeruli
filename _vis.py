@@ -12,7 +12,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 import _util
-
+import settings
+settings.init()
 
 '''
     Model functions
@@ -73,10 +74,15 @@ def visualize_model_activation_maps(model, img, color_map=None):
 '''
 
 
-def visualize_layer_max_activations(layer, model_input, img_shape=(299,299,3), grad_step=1.0, grad_iter=100,
+def visualize_layer_max_activations(layer, model_input, img_shape=None, grad_step=1.0, grad_iter=100,
                                     save_all_filters=True, sort_descending_loss=False, img_placeholder=None):
 
-    (img_width, img_height, ch) = img_shape
+    if img_shape:
+        (img_width, img_height, ch) = img_shape
+    else:
+        img_width = settings.MODEL_INPUT_WIDTH
+        img_height = settings.MODEL_INPUT_HEIGHT
+        ch = settings.MODEL_INPUT_DEPTH
 
     weights = layer.get_weights()[0]
     nb_filters = weights.shape[-1]

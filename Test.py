@@ -10,6 +10,9 @@ from scipy.misc import imsave
 import _util
 import _vis
 
+import settings
+settings.init()
+
 
 def main(dir=None, n=None):
     if dir is None:
@@ -26,8 +29,8 @@ def main(dir=None, n=None):
     DIR_NONGLOM = IMAGES_DIR_PATH + "/nonglomeruli"
 
     # Load some images and preprocess them
-    x_test_glom = _util.get_n_samples(NB_SAMPLES, dir=DIR_GLOM, target_size=(299, 299))
-    x_test_nonglom = _util.get_n_samples(NB_SAMPLES, dir=DIR_NONGLOM, target_size=(299, 299))
+    x_test_glom = _util.get_n_samples(NB_SAMPLES, dir=DIR_GLOM, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
+    x_test_nonglom = _util.get_n_samples(NB_SAMPLES, dir=DIR_NONGLOM, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
 
     x_test_glom /= 255
     x_test_nonglom /= 255

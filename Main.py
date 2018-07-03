@@ -1,4 +1,3 @@
-"""Train model using transfer learning."""
 import argparse
 import pandas as pd
 
@@ -17,7 +16,7 @@ import Data
 import Test
 
 import settings
-settings.init_globals()
+settings.init()
 
 # Helper: Save the model.
 checkpointer = ModelCheckpoint(

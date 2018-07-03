@@ -1,5 +1,5 @@
 
-def init_globals():
+def init():
     global class_dict, class_weight
     global DENSE_TRAIN_EPOCHS, FINE_TUNE_EPOCHS, NUM_CLASSES, CLASS_MODE, RANDOM_SEED
     global BATCH_SIZE, MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT, MODEL_INPUT_DEPTH
