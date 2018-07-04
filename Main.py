@@ -35,6 +35,7 @@ tensorboard = TensorBoard(log_dir='./output/events')
 # Helper: Keep track of acc and loss during training
 history = History()
 
+
 def train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES ):
 
     model = MyInception.get_model(settings.NUM_CLASSES)
@@ -106,7 +107,10 @@ def main(dir=None, split=None):
         IMAGES_DIR_PATH = dir
 
     if split == None:
-        VALIDATION_SPLIT = 10
+        '''
+            If data is already split in train / test subfolders
+        '''
+        VALIDATION_SPLIT = None
     else:
         VALIDATION_SPLIT = split
 
@@ -121,8 +125,8 @@ def main(dir=None, split=None):
 
     # plot  metrics during training epochs
     plt.style.use('seaborn-notebook')
-    plt.plot(history.history['loss'], 'go-', label='Train loss')
-    plt.plot(history.history['val_loss'], 'ro-', label='Test loss')
+    plt.plot(history.history['loss'], 'go--', label='Train loss')
+    plt.plot(history.history['val_loss'], 'ro--', label='Test loss')
     plt.plot(history.history['acc'], 'g*-', label='Train acc')
     plt.plot(history.history['val_acc'], 'r*-', label='Test acc')
     #plt.axvline(x=fine_tune_epoch, 'k--')

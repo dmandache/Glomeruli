@@ -79,7 +79,7 @@ def get_model(num_classes=1):
     model.add(Flatten())
     model.add(Dense(1024, init='glorot_uniform'))
     model.add(Activation('relu'))
-    model.add(Dropout(0.25))
+    model.add(Dropout(0.5))
     model.add(Dense(num_classes, init='glorot_uniform'))
     model.add(Activation('sigmoid'))
 

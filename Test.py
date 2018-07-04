@@ -1,5 +1,5 @@
 from keras.models import load_model
-from MyMetrics import sensitivity, specificity, f1_score
+from MyMetrics import precision, recall, sensitivity, specificity, f1_score
 
 import argparse
 
@@ -36,9 +36,11 @@ def main(dir=None, n=None):
     x_test_nonglom /= 255
 
     # load model
-    model = load_model('./output/model.hdf5', custom_objects={'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
+    model = load_model('./output/model.hdf5',
+                       custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
+                                       'specificity': specificity, 'f1_score': f1_score})
 
-    #model.summary()
+    model.summary()
 
     glomeruli_examples = _util.plot_to_grid(x_test_glom)
     imsave('./output/%s.png' % 'glomeruli_examples', glomeruli_examples)
@@ -61,9 +63,9 @@ def main(dir=None, n=None):
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
-    print('Glomeruli probability {} = ' .format(y_test_glom[10][0]))
+    print('Glomeruli probability  = {} ' .format(y_test_glom[10][0]))
 
-    _vis.visualize_model_max_activations(model, grad_iter=20)
+    _vis.visualize_model_max_activations(model, grad_iter=50)
 
     _vis.visualize_model_weights(model)
 

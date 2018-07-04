@@ -20,7 +20,7 @@ settings.init()
 '''
 
 
-def visualize_model_max_activations(model, img_shape=(299,299,3),  grad_step=1.0, grad_iter=20, save_all_filters=True, img_placeholder=None):
+def visualize_model_max_activations(model, img_shape=None,  grad_step=1.0, grad_iter=20, save_all_filters=True, img_placeholder=None):
     """
         Saves to file the maximum activations of all the filters of all convolutional layers in the model.
         Performs gradient ascent in the image space wrt the loss.
@@ -61,7 +61,7 @@ def visualize_model_weights(model):
             visualize_layer_weights(layer)
 
 
-def visualize_model_activation_maps(model, img, color_map=None):
+def visualize_model_activation_maps(model, img, color_map=True):
     os.makedirs('./output/activation_maps/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
@@ -170,7 +170,7 @@ def visualize_layer_weights(layer):
         print('Skipping layer %s with conv filters of size %d x %d' (layer.name, width, height))
 
 
-def visualize_layer_activation_maps(model, layer, img, color_map=False):
+def visualize_layer_activation_maps(model, layer, img, color_map=True):
 
     get_activations = K.function([model.layers[0].input, K.learning_phase()], [layer.output, ])
     activations = get_activations([img, 0])[0]

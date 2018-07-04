@@ -2,7 +2,7 @@ import os
 import shutil
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
-
+from PIL import Image
 import FlyGenerator
 import settings
 settings.init()
@@ -10,7 +10,6 @@ settings.init()
 train_data_gen_args = dict(rescale=1. / 255,
                             featurewise_center=True,
                             featurewise_std_normalization=True,
-                            zca_whitening=True,
                             rotation_range=180,
                             width_shift_range=0.2,
                             height_shift_range=0.2,
@@ -19,12 +18,13 @@ train_data_gen_args = dict(rescale=1. / 255,
 
 test_data_gen_args = dict(rescale=1. / 255,
                         featurewise_center=True,
-                        featurewise_std_normalization=True,
-                        zca_whitening=True)
+                        featurewise_std_normalization=True)
 
 
 # add functionality for splitting folders
 def get_generators(image_dir, validation_pct=None):
+    if validation_pct is None:
+        return gen_from_folders(image_dir)
     return gen_from_image_lists(image_dir, validation_pct)
 
 def gen_from_image_lists(image_dir, validation_pct=20):
@@ -95,24 +95,17 @@ def gen_from_folders(image_dir):
 
     global train_data_gen_args, test_data_gen_args
 
-    # folders with unsplit data
-    DIR_GLOM = image_dir + "/glomeruli"
-    DIR_NONGLOM = image_dir + "/nonglomeruli"
-
-    # go up one folder
-    parent_dir = os.pardir(image_dir)
-
     # folders with split data
-    DIR_TRAIN_GLOM = parent_dir + "split/train/glomeruli"
-    DIR_TEST_GLOM = parent_dir + "split/test/glomeruli"
-    DIR_TRAIN_NONGLOM = parent_dir + "split/train/nonglomeruli"
-    DIR_TEST_NONGLOM = parent_dir + "split/test/nonglomeruli"
+    DIR_TRAIN_GLOM = image_dir + "/split/train/glomeruli"
+    DIR_TEST_GLOM = image_dir + "/split/test/glomeruli"
+    DIR_TRAIN_NONGLOM = image_dir + "/split/train/nonglomeruli"
+    DIR_TEST_NONGLOM = image_dir + "/split/test/nonglomeruli"
 
     NUM_TRAIN_SAMPLES = len(os.listdir(DIR_TRAIN_GLOM)) + len(os.listdir(DIR_TRAIN_NONGLOM))
     NUM_TEST_SAMPLES = len(os.listdir(DIR_TEST_GLOM)) + len(os.listdir(DIR_TEST_NONGLOM))
 
-    TRAIN_DIR_PATH = image_dir + "split/train"
-    TEST_DIR_PATH = image_dir + "split/test"
+    TRAIN_DIR_PATH = image_dir + "/split/train"
+    TEST_DIR_PATH = image_dir + "/split/test"
 
     train_datagen = ImageDataGenerator(**train_data_gen_args)
 
@@ -131,9 +124,9 @@ def gen_from_folders(image_dir):
         batch_size=settings.BATCH_SIZE,
         class_mode=settings.CLASS_MODE)
 
-    test_datagen.fit(train_generator, nb_iter=100)
+    test_datagen.fit(train_generator, nb_iter=1)
 
-    train_datagen.fit_generator(train_generator, nb_iter=100)
+    train_datagen.fit(train_generator, nb_iter=1)
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
 
@@ -165,19 +158,27 @@ def split_data_train_test_folders(image_dir, validation_pct=20):
     DIR_NONGLOM = image_dir + "/nonglomeruli"
 
     # go up one folder
-    parent_dir = os.pardir(image_dir)
+    parent_dir = os.path.dirname(image_dir)
 
     # folders with split data
-    DIR_TRAIN_GLOM = parent_dir + "split/train/glomeruli"
-    DIR_TEST_GLOM = parent_dir + "split/test/glomeruli"
-    DIR_TRAIN_NONGLOM = parent_dir + "split/train/nonglomeruli"
-    DIR_TEST_NONGLOM = parent_dir + "split/test/nonglomeruli"
+    DIR_TRAIN_GLOM = parent_dir + "/split/train/glomeruli"
+    DIR_TEST_GLOM = parent_dir + "/split/test/glomeruli"
+    DIR_TRAIN_NONGLOM = parent_dir + "/split/train/nonglomeruli"
+    DIR_TEST_NONGLOM = parent_dir + "/split/test/nonglomeruli"
+
+    os.makedirs(DIR_TRAIN_GLOM, exist_ok=True)
+    os.makedirs(DIR_TEST_GLOM, exist_ok=True)
+    os.makedirs(DIR_TRAIN_NONGLOM, exist_ok=True)
+    os.makedirs(DIR_TEST_NONGLOM, exist_ok=True)
 
     files_glom = os.listdir(DIR_GLOM)
     files_nonglom = os.listdir(DIR_NONGLOM)
 
+    nb_files_glom = len(files_glom)
+    nb_files_nonglom = len(files_nonglom)
+
     for f in files_glom:
-        if np.random.rand(1) < validation_pct:
+        if np.random.rand(1) < validation_pct: # and nb_files_glom_test < nb_files_glom // validation_pct:
             shutil.copy(DIR_GLOM + '/' + f, DIR_TEST_GLOM + '/' + f)
         else:
             shutil.copy(DIR_GLOM + '/' + f, DIR_TRAIN_GLOM + '/' + f)
@@ -187,3 +188,53 @@ def split_data_train_test_folders(image_dir, validation_pct=20):
             shutil.copy(DIR_NONGLOM + '/' + f, DIR_TEST_NONGLOM + '/' + f)
         else:
             shutil.copy(DIR_NONGLOM + '/' + f, DIR_TRAIN_NONGLOM + '/' + f)
+
+
+if __name__ == '__main__':
+
+    '''
+        Split data in train and test 
+    '''
+    dir = "/Users/diana/Documents/2018_Glomeruli/data"
+    #split_data_train_test_folders(image_dir=dir, validation_pct=10)
+
+    '''
+        Augment training data for glomeruli class
+    '''
+    GLOM_TRAIN_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/train/glomeruli/"
+    AUGM_GLOM_TRAIN_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/train/augmented_glomeruli"
+
+    target_size = (512, 512)
+
+    files = os.listdir(GLOM_TRAIN_DIR_PATH)
+
+    x_train_glom = []
+
+    for f in files:
+        if f == '.DS_Store':
+            continue
+        path = GLOM_TRAIN_DIR_PATH + f
+        x = Image.open(path)
+        x_resize = Image.Image.resize(x, target_size)
+        x_resize = np.asarray(x_resize, dtype='float32')
+        x_resize /= 255
+        x_train_glom.append(x_resize)
+
+    x_train_glom = np.stack(x_train_glom, axis=0)
+
+
+    train_data_gen_args = dict(
+                               rotation_range=90,
+                               width_shift_range=0.1,
+                               shear_range=0.1,
+                               zoom_range=0.1,
+                               fill_mode='reflect')
+
+    train_datagen = ImageDataGenerator(**train_data_gen_args)
+
+    train_generator = train_datagen.flow(
+                        x_train_glom,
+                        save_to_dir=AUGM_GLOM_TRAIN_DIR_PATH)
+
+    train_datagen.fit(train_generator, augment=True, rounds=1)
+

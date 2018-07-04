@@ -18,7 +18,6 @@ def init():
     RANDOM_SEED = None
     CLASS_MODE = 'binary'
 
-    # we chose to train the top 2 inception blocks
     BATCH_SIZE = 150
 
     MODEL_INPUT_WIDTH = 288
