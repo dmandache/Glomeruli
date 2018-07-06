@@ -70,7 +70,7 @@ def train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NU
     model = MyInception.get_mid_layer_model(model)
     model.fit_generator(
         train_generator,
-        initial_epoch=fine_tune_epoch+1,
+        initial_epoch=fine_tune_epoch,
         steps_per_epoch=NUM_TRAIN_SAMPLES // settings.BATCH_SIZE,
         validation_data=validation_generator,
         validation_steps=NUM_TEST_SAMPLES // settings.BATCH_SIZE,
