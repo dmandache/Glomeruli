@@ -48,7 +48,7 @@ def visualize_model_max_activations(model, img_shape=None,  grad_step=1.0, grad_
     """
     os.makedirs('./output/filters/', exist_ok=True)
     for layer in model.layers:
-        if 'conv' in layer.name:
+        if 'conv' or 'mixed' in layer.name:
             print('Plotting maximum activations of layer ', layer.name)
             visualize_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, save_all_filters, img_placeholder)
 
