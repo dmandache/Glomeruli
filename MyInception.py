@@ -3,7 +3,7 @@ from keras import optimizers
 from keras.layers import Dense, GlobalAveragePooling2D
 from keras.applications.inception_v3 import InceptionV3
 
-import MyMetrics
+from MyMetrics import precision, recall, sensitivity, specificity, f1_score
 
 TRAINABLE_LAYERS = 172
 
@@ -44,7 +44,7 @@ def get_top_layer_model(model):
 
     # compile the model (should be done after setting layers to non-trainable)
     model.compile(optimizer='adam', loss='binary_crossentropy',
-                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
+                  metrics=['accuracy', precision, recall, sensitivity, specificity, f1_score])
 
     return model
 
@@ -59,9 +59,9 @@ def get_mid_layer_model(model):
 
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
-    model.compile(optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=1e-6),
+    model.compile(optimizer=optimizers.SGD(lr=0.0001, momentum=0.9, decay=1e-6),
                   loss='binary_crossentropy',
-                  metrics=['accuracy', MyMetrics.sensitivity, MyMetrics.specificity, MyMetrics.f1_score])
+                  metrics=['accuracy', precision, recall, sensitivity, specificity, f1_score])
 
     return model
 

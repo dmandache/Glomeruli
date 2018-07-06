@@ -2,7 +2,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Activation, Flatten
 from keras import optimizers
 from keras import backend as K
-from  MyMetrics import precision, recall, sensitivity, specificity, f1_score
+from MyMetrics import precision, recall, sensitivity, specificity, f1_score
 
 import settings
 settings.init()

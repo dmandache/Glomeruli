@@ -6,7 +6,7 @@ def init():
 
     class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
 
-    weight_glom = 5
+    weight_glom = 1
 
     class_weight = {class_dict['nonglomeruli']: 1,  # 0 : 1
                     class_dict['glomeruli']: weight_glom}  # 1 : 25

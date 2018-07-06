@@ -35,8 +35,10 @@ tensorboard = TensorBoard(log_dir='./output/events')
 # Helper: Keep track of acc and loss during training
 history = History()
 
+fine_tune_epoch = 0
 
 def train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES ):
+    global fine_tune_epoch
 
     model = MyInception.get_model(settings.NUM_CLASSES)
 
@@ -56,7 +58,9 @@ def train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NU
         callbacks=[checkpointer, early_stopper, tensorboard, history])
 
     model = load_model('./output/model.hdf5',
-                       custom_objects={'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
+                                       'specificity': specificity, 'f1_score': f1_score})
+
 
     fine_tune_epoch = len(history.history['loss'])
     print('Epoch when fine-tuning starts: %d' % fine_tune_epoch)
@@ -74,7 +78,8 @@ def train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NU
         callbacks=[checkpointer, early_stopper, tensorboard, history])
 
     model = load_model('./output/model.hdf5',
-                       custom_objects={'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
+                                       'specificity': specificity, 'f1_score': f1_score})
     return model
 
 
@@ -94,15 +99,17 @@ def train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_
         callbacks=[checkpointer, early_stopper, tensorboard, history])
 
     model = load_model('./output/model.hdf5',
-                       custom_objects={'precision': precision,'recall': recall, 'sensitivity': sensitivity, 'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects={'precision': precision,'recall': recall, 'sensitivity': sensitivity,
+                                       'specificity': specificity, 'f1_score': f1_score})
 
     return model
 
 
-def main(dir=None, split=None):
+def main(dir=None, split=None, model=None, train=None, test=None):
+    global fine_tune_epoch
 
     if dir == None:
-        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/"
+        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/"
     else:
         IMAGES_DIR_PATH = dir
 
@@ -116,9 +123,9 @@ def main(dir=None, split=None):
 
     train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES = Data.get_generators(IMAGES_DIR_PATH, VALIDATION_SPLIT)
 
-    #model = train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES)
+    model = train_inception(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES)
 
-    model = train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES)
+    #model = train_mymodel(train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES)
 
     # save metrics during training epochs
     pd.DataFrame(history.history).to_csv("./output/history.csv")
@@ -127,9 +134,7 @@ def main(dir=None, split=None):
     plt.style.use('seaborn-notebook')
     plt.plot(history.history['loss'], 'go--', label='Train loss')
     plt.plot(history.history['val_loss'], 'ro--', label='Test loss')
-    plt.plot(history.history['acc'], 'g*-', label='Train acc')
-    plt.plot(history.history['val_acc'], 'r*-', label='Test acc')
-    #plt.axvline(x=fine_tune_epoch, 'k--')
+    plt.axvline(fine_tune_epoch, 'k--')
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
@@ -143,6 +148,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--dir', help='data directory')
     parser.add_argument('--split', help='percentage of validation data')
+    parser.add_argument('--model', help='InceptionV3 / Small CNN')
+    parser.add_argument('--train', help='is training')
+    parser.add_argument('--test', help='is testing')
     args = parser.parse_args()
 
     main(**vars(args))
