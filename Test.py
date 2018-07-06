@@ -66,7 +66,7 @@ def main(dir=None, n=None):
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli probability  = {} ' .format(y_test_glom[10][0]))
 
-    _vis.visualize_model_max_activations(model, grad_iter=50)
+    _vis.visualize_model_max_activations(model, grad_step=0.5, grad_iter=300)
 
     _vis.visualize_model_weights(model)
 

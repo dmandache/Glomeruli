@@ -48,9 +48,12 @@ def visualize_model_max_activations(model, img_shape=None,  grad_step=1.0, grad_
     """
     os.makedirs('./output/filters/', exist_ok=True)
     for layer in model.layers:
-        if 'conv' or 'mixed' in layer.name:
+        if 'conv' in layer.name:
             print('Plotting maximum activations of layer ', layer.name)
-            visualize_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, save_all_filters, img_placeholder)
+            #visualize_conv_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, save_all_filters, img_placeholder)
+        elif 'mixed' in layer.name:
+            print('Plotting maximum activations of layer ', layer.name)
+            visualize_concat_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, img_placeholder)
 
 
 def visualize_model_weights(model):
@@ -74,7 +77,7 @@ def visualize_model_activation_maps(model, img, color_map=True):
 '''
 
 
-def visualize_layer_max_activations(layer, model_input, img_shape=None, grad_step=1.0, grad_iter=100,
+def visualize_conv_layer_max_activations(layer, model_input, img_shape=None, grad_step=1.0, grad_iter=100,
                                     save_all_filters=True, sort_descending_loss=False, img_placeholder=None):
 
     if img_shape:
@@ -154,6 +157,54 @@ def visualize_layer_max_activations(layer, model_input, img_shape=None, grad_ste
     filters_img = _util.gaussian_blur(filters_img)
 
     imsave('./output/filters/%s.png' % file_name, filters_img)
+
+
+def visualize_concat_layer_max_activations(layer, model_input, img_shape=None, grad_step=1.0, grad_iter=100,
+                                            img_placeholder=None):
+
+    if img_shape:
+        (img_width, img_height, ch) = img_shape
+    else:
+        img_width = settings.MODEL_INPUT_WIDTH
+        img_height = settings.MODEL_INPUT_HEIGHT
+        ch = settings.MODEL_INPUT_DEPTH
+
+    input_img = model_input
+
+    # we build a loss function that maximizes the activation
+    # of the nth filter of the layer considered
+    layer_output = layer.output
+
+    loss = K.mean(layer_output)
+
+    # we compute the gradient of the input picture wrt this loss
+    grads = K.gradients(loss, input_img)[0]
+
+    # normalization trick: we normalize the gradient
+    grads = normalize(grads)
+
+    # this function returns the loss and grads given the input picture
+    iterate = K.function([input_img, K.learning_phase()], [loss, grads])
+
+    # we start from a gray image with some random noise
+    if img_placeholder is None:
+        input_img_data = np.random.random((1, img_width, img_height, ch))
+        input_img_data = (input_img_data - 0.5) * 20 + 128
+    else:
+        input_img_data = np.expand_dims(img_placeholder, 0)
+
+    # we run gradient ascent for n steps
+    for i in range(grad_iter):
+        loss_value, grads_value = iterate([input_img_data])
+        input_img_data += grads_value * float(grad_step)
+
+    img = deprocess_image(input_img_data[0])
+
+    img = _util.gaussian_blur(img)
+
+    file_name = '%s' % layer.name
+
+    imsave('./output/filters/%s.png' % file_name, img)
 
 
 def visualize_layer_weights(layer):
