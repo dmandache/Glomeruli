@@ -7,7 +7,8 @@ import FlyGenerator
 import settings
 settings.init()
 
-train_data_gen_args = dict(rescale=1. / 255,
+train_data_gen_args = dict(rescale=1. / 255)
+'''
                             featurewise_center=True,
                             featurewise_std_normalization=True,
                             rotation_range=180,
@@ -15,10 +16,9 @@ train_data_gen_args = dict(rescale=1. / 255,
                             height_shift_range=0.2,
                             horizontal_flip=True,
                             fill_mode='reflect')
+'''
 
-test_data_gen_args = dict(rescale=1. / 255,
-                        featurewise_center=True,
-                        featurewise_std_normalization=True)
+test_data_gen_args = dict(rescale=1. / 255)
 
 
 # add functionality for splitting folders
@@ -124,9 +124,8 @@ def gen_from_folders(image_dir):
         batch_size=settings.BATCH_SIZE,
         class_mode=settings.CLASS_MODE)
 
-    test_datagen.fit(train_generator)
-
-    train_datagen.fit(train_generator)
+    #test_datagen.fit(train_generator)
+    #train_datagen.fit(train_generator)
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
 
