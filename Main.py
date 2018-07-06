@@ -27,7 +27,7 @@ checkpointer = ModelCheckpoint(
     save_best_only=True)
 
 # Helper: Stop when we stop learning.
-early_stopper = EarlyStopping(patience=100)
+early_stopper = EarlyStopping(patience=10)
 
 # Helper: TensorBoard
 tensorboard = TensorBoard(log_dir='./output/events')
