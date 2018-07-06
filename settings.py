@@ -12,7 +12,7 @@ def init():
                     class_dict['glomeruli']: weight_glom}  # 1 : 25
 
     DENSE_TRAIN_EPOCHS = 30
-    FINE_TUNE_EPOCHS = 500
+    FINE_TUNE_EPOCHS = 200
 
     NUM_CLASSES = 1
     RANDOM_SEED = None
@@ -20,6 +20,6 @@ def init():
 
     BATCH_SIZE = 150
 
-    MODEL_INPUT_WIDTH = 288
-    MODEL_INPUT_HEIGHT = 288
+    MODEL_INPUT_WIDTH = 299
+    MODEL_INPUT_HEIGHT = 299
     MODEL_INPUT_DEPTH = 3

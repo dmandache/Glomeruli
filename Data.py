@@ -96,16 +96,16 @@ def gen_from_folders(image_dir):
     global train_data_gen_args, test_data_gen_args
 
     # folders with split data
-    DIR_TRAIN_GLOM = image_dir + "/split/train/glomeruli"
-    DIR_TEST_GLOM = image_dir + "/split/test/glomeruli"
-    DIR_TRAIN_NONGLOM = image_dir + "/split/train/nonglomeruli"
-    DIR_TEST_NONGLOM = image_dir + "/split/test/nonglomeruli"
+    DIR_TRAIN_GLOM = image_dir + "/train/glomeruli"
+    DIR_TEST_GLOM = image_dir + "/test/glomeruli"
+    DIR_TRAIN_NONGLOM = image_dir + "/train/nonglomeruli"
+    DIR_TEST_NONGLOM = image_dir + "/test/nonglomeruli"
 
     NUM_TRAIN_SAMPLES = len(os.listdir(DIR_TRAIN_GLOM)) + len(os.listdir(DIR_TRAIN_NONGLOM))
     NUM_TEST_SAMPLES = len(os.listdir(DIR_TEST_GLOM)) + len(os.listdir(DIR_TEST_NONGLOM))
 
-    TRAIN_DIR_PATH = image_dir + "/split/train"
-    TEST_DIR_PATH = image_dir + "/split/test"
+    TRAIN_DIR_PATH = image_dir + "/train"
+    TEST_DIR_PATH = image_dir + "/test"
 
     train_datagen = ImageDataGenerator(**train_data_gen_args)
 
@@ -124,9 +124,9 @@ def gen_from_folders(image_dir):
         batch_size=settings.BATCH_SIZE,
         class_mode=settings.CLASS_MODE)
 
-    test_datagen.fit(train_generator, nb_iter=1)
+    test_datagen.fit(train_generator)
 
-    train_datagen.fit(train_generator, nb_iter=1)
+    train_datagen.fit(train_generator)
 
     return train_generator, validation_generator, NUM_TRAIN_SAMPLES, NUM_TEST_SAMPLES
 
