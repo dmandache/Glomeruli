@@ -124,6 +124,15 @@ def gen_from_folders(image_dir):
         batch_size=settings.BATCH_SIZE,
         class_mode=settings.CLASS_MODE)
 
+    if train_generator.class_indices != validation_generator.class_indices:
+        raise ValueError
+
+    settings.class_dict = train_generator.class_indices
+    print("label mapping is : ", settings.class_dict)
+    settings.class_weight = {settings.class_dict['nonglomeruli']: 1,  # 0 : 1
+                             settings.class_dict['glomeruli']: settings.weight_glom}  # 1 : 25
+    print("class weighting is : ", settings.class_weight)
+
     #test_datagen.fit(train_generator)
     #train_datagen.fit(train_generator)
 

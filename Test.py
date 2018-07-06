@@ -52,25 +52,27 @@ def main(dir=None, n=None):
     # print('Those should be all ones - glom 1')
     y_test_glom = model.predict(x_test_glom)
     y_true_glom = list(np.ones(len(y_test_glom)))
-    TP = np.count_nonzero(y_test_glom >= 0.6)
+    TP = np.count_nonzero(y_test_glom >= 0.51)
     print('True Positives ', TP)
+    print(y_test_glom.argmax(axis=-1))
 
     # print('Those should be all zeros - nonglom 0')
     y_test_nonglom = model.predict(x_test_nonglom)
     y_true_nonglom = list(np.zeros(len(y_test_nonglom)))
-    TN = np.count_nonzero(y_test_nonglom <= 0.4)
+    TN = np.count_nonzero(y_test_nonglom <= 0.5)
     print('True Negatives ', TN)
+    print(y_test_nonglom.argmax(axis=-1))
 
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli probability  = {} ' .format(y_test_glom[10][0]))
 
-    _vis.visualize_model_max_activations(model, grad_step=0.5, grad_iter=300)
+    #_vis.visualize_model_max_activations(model, grad_step=0.5, grad_iter=300)
 
-    _vis.visualize_model_weights(model)
+   # _vis.visualize_model_weights(model)
 
-    _vis.visualize_model_activation_maps(model, img_input)
+    #_vis.visualize_model_activation_maps(model, img_input)
 
 
 

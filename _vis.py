@@ -50,7 +50,7 @@ def visualize_model_max_activations(model, img_shape=None,  grad_step=1.0, grad_
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting maximum activations of layer ', layer.name)
-            #visualize_conv_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, save_all_filters, img_placeholder)
+            visualize_conv_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, save_all_filters, img_placeholder)
         elif 'mixed' in layer.name:
             print('Plotting maximum activations of layer ', layer.name)
             visualize_concat_layer_max_activations(layer, model.input, img_shape, grad_step, grad_iter, img_placeholder)
