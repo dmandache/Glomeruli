@@ -16,7 +16,8 @@ settings.init()
 
 def main(dir=None, n=None):
     if dir is None:
-        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data"
+        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/test"
+        #IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data
     else:
         IMAGES_DIR_PATH = dir
 

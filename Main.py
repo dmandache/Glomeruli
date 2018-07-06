@@ -134,7 +134,7 @@ def main(dir=None, split=None, model=None, train=None, test=None):
     plt.style.use('seaborn-notebook')
     plt.plot(history.history['loss'], 'go--', label='Train loss')
     plt.plot(history.history['val_loss'], 'ro--', label='Test loss')
-    plt.axvline(fine_tune_epoch, 'k--')
+    plt.axvline(x=fine_tune_epoch)
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
