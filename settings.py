@@ -18,7 +18,7 @@ def init():
     RANDOM_SEED = None
     CLASS_MODE = 'binary'
 
-    BATCH_SIZE = 150
+    BATCH_SIZE = 200
 
     MODEL_INPUT_WIDTH = 299
     MODEL_INPUT_HEIGHT = 299
