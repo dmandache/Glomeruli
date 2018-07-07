@@ -68,7 +68,7 @@ def main(dir=None, n=None):
     img_input = np.expand_dims(img, axis=0)
     print('Glomeruli probability  = {} ' .format(y_pred_glom[10][0]))
 
-    y_pred = y_pred_glom.tolist() + y_pred_nonglom.tolist()
+    y_pred = np.squeeze(y_pred_glom) + np.squeeze(y_pred_nonglom)
     y_true = y_true_glom + y_true_nonglom
     _util.confusion_matrix(y_true,y_pred)
 
