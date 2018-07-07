@@ -54,14 +54,14 @@ def main(dir=None, n=None):
     y_true_glom = list(np.ones(len(y_pred_glom)))
     TP = np.count_nonzero(y_pred_glom >= 0.51)
     print('True Positives ', TP)
-    print(y_pred_glom)
+    print(y_pred_glom.flatten())
 
     # print('Those should be all zeros - nonglom 0')
     y_pred_nonglom = model.predict(x_test_nonglom)
     y_true_nonglom = list(np.zeros(len(y_pred_nonglom)))
     TN = np.count_nonzero(y_pred_nonglom <= 0.5)
     print('True Negatives ', TN)
-    print(y_pred_nonglom)   #print(y_test_nonglom.argmax(axis=-1)) # for categorical
+    print(y_pred_nonglom.flatten())   #print(y_test_nonglom.argmax(axis=-1)) # for categorical
 
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
