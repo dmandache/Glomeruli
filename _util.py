@@ -11,8 +11,8 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 # doesn't work
-def confusion_matrix(y_test, y_pred):
-    raw_data = {'actual': y_test,
+def confusion_matrix(y_true, y_pred):
+    raw_data = {'actual': y_true,
                 'preds': y_pred}
     df = pd.DataFrame(raw_data, columns=['actual', 'preds'])
     tab = pd.crosstab(df.actual, df.preds, margins=True)
