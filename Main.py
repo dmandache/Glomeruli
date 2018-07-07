@@ -132,16 +132,16 @@ def main(dir=None, split=None, model=None, train=None, test=None):
     pd.DataFrame(history.history).to_csv("./output/history.csv")
 
     # plot  metrics during training epochs
-    plt.style.use('seaborn-notebook')
-    plt.plot(history.history['loss'], 'go--', label='Train loss')
-    plt.plot(history.history['val_loss'], 'ro--', label='Test loss')
-    plt.axvline(x=fine_tune_epoch)
+    plt.style.use('seaborn')
+    plt.plot(history.history['loss'], 'g.-', label='Train loss')
+    plt.plot(history.history['val_loss'], 'r.-', label='Test loss')
+    plt.axvline(x=fine_tune_epoch, color='gray', linestyle='dashed')
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
     plt.savefig('./output/training_plot.png')
 
-    Test.main(IMAGES_DIR_PATH)
+    Test.main(IMAGES_DIR_PATH + '/test')
 
 
 if __name__ == '__main__':
