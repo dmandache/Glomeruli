@@ -50,23 +50,23 @@ def main(dir=None, n=None):
     imsave('./output/%s.png' % 'non_glomeruli_examples', non_glomeruli_examples)
 
     # print('Those should be all ones - glom 1')
-    y_pred_glom = model.predict(x_test_glom)
+    y_pred_glom = model.predict(x_test_glom).flatten()
     y_true_glom = list(np.ones(len(y_pred_glom)))
     TP = np.count_nonzero(y_pred_glom >= 0.51)
     print('True Positives ', TP)
-    print(y_pred_glom.flatten())
+    print(y_pred_glom)
 
     # print('Those should be all zeros - nonglom 0')
-    y_pred_nonglom = model.predict(x_test_nonglom)
+    y_pred_nonglom = model.predict(x_test_nonglom).flatten()
     y_true_nonglom = list(np.zeros(len(y_pred_nonglom)))
     TN = np.count_nonzero(y_pred_nonglom <= 0.5)
     print('True Negatives ', TN)
-    print(y_pred_nonglom.flatten())   #print(y_test_nonglom.argmax(axis=-1)) # for categorical
+    print(y_pred_nonglom.)   #print(y_test_nonglom.argmax(axis=-1)) # for categorical
 
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
     img_input = np.expand_dims(img, axis=0)
-    print('Glomeruli probability  = {} ' .format(y_pred_glom[10][0]))
+    print('Glomeruli probability  = {} ' .format(y_pred_glom[10]))
 
     y_pred = y_pred_glom.flatten() + y_pred_nonglom.flatten()
     y_true = y_true_glom + y_true_nonglom
