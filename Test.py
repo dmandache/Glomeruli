@@ -61,7 +61,7 @@ def main(dir=None, n=None):
     y_true_nonglom = list(np.zeros(len(y_pred_nonglom)))
     TN = np.count_nonzero(y_pred_nonglom <= 0.5)
     print('True Negatives ', TN)
-    print(y_pred_nonglom.)   #print(y_test_nonglom.argmax(axis=-1)) # for categorical
+    print(y_pred_nonglom)   #print(y_test_nonglom.argmax(axis=-1)) # for categorical
 
     img = x_test_glom[10, :, :, :]
     imsave('./output/glom.png', img)
