@@ -53,7 +53,7 @@ def get_mid_layer_model(model):
     """After we fine-tune the dense layers, train deeper."""
     # freeze the first TRAINABLE_LAYER_INDEX layers and unfreeze the rest
     for layer in model.layers[:TRAINABLE_LAYERS]:
-        layer.trainable = False
+        layer.trainable = True # CHANGED HERE (was False)
     for layer in model.layers[TRAINABLE_LAYERS:]:
         layer.trainable = True
 
