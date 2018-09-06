@@ -88,6 +88,34 @@ def get_all_imgs_from_folder(dir, target_size=(299,299)):
     return samples
 
 
+def prediction_to_folder(images, proba, path_dir=None):
+    if path_dir is None:
+        path_dir = './glom_prediction'
+
+    if not os.path.exists(path_dir):
+        os.makedirs(path_dir)
+
+    path_dir_glom = os.path.join(path_dir, 'glomeruli')
+    if not os.path.exists(path_dir_glom):
+        os.makedirs(path_dir_glom)
+
+    path_dir_nonglom = os.path.join(path_dir, 'nonglomeruli')
+    if not os.path.exists(path_dir_nonglom):
+        os.makedirs(path_dir_nonglom)
+
+    for idx, x in enumerate(images):
+        p = (1-proba[idx]) * 100
+        filename = "{0}_{1:.3f}%.png".format(idx,p)
+        if p >= 50:
+            print("Found a glomeruli, I am {0:.4f} % sure !".format(p))
+            Image.fromarray(x*255, mode='RGB').save(os.path.join(path_dir_glom, filename))
+        else:
+            print("Whew ! Not a glomeruli ! There is still {0:.4f} % chance ".format(p))
+            Image.fromarray(x*255, mode='RGB').save(os.path.join(path_dir_nonglom, filename))
+
+    print("DONE!")
+
+
 
 def plot_to_grid(batch, grid_size=None, random=False):
 
