@@ -67,7 +67,16 @@ def get_all_imgs_from_folder(dir, target_size=(299,299)):
             print("Could not open image file ", f)
             continue
         if target_size is not None:
-            img_new = Image.Image.resize(img, target_size)
+            original_size = img.size
+            print("Resizing image {} from original size {} to target size {}.".format(path, original_size, target_size))
+            # zero pad if smaller
+            if original_size[0] < target_size[0] and original_size[1] < target_size[1]:
+                img_new = Image.new("RGB", target_size)
+                img_new.paste(img, ((target_size[0] - original_size[0]) // 2,
+                                  (target_size[1] - original_size[1]) // 2))
+            # resize if bigger
+            else:
+                img_new = Image.Image.resize(img, target_size)
         else:
             img_new = img
         x = np.asarray(img_new, dtype='float32')
