@@ -69,14 +69,14 @@ def get_all_imgs_from_folder(dir, target_size=(299,299)):
         if target_size is not None:
             original_size = img.size
             print("Resizing image {} from original size {} to target size {}.".format(path, original_size, target_size))
+            '''
             # zero pad if smaller
             if original_size[0] < target_size[0] and original_size[1] < target_size[1]:
                 img_new = Image.new("RGB", target_size)
                 img_new.paste(img, ((target_size[0] - original_size[0]) // 2,
                                   (target_size[1] - original_size[1]) // 2))
-            # resize if bigger
-            else:
-                img_new = Image.Image.resize(img, target_size)
+            '''
+            img_new = Image.Image.resize(img, target_size)
         else:
             img_new = img
         x = np.asarray(img_new, dtype='float32')
@@ -108,13 +108,12 @@ def prediction_to_folder(images, proba, path_dir=None):
         filename = "{0}_{1:.3f}%.png".format(idx,p)
         if p >= 50:
             print("Found a glomeruli, I am {0:.4f} % sure !".format(p))
-            Image.fromarray(x*255, mode='RGB').save(os.path.join(path_dir_glom, filename))
+            imsave(os.path.join(path_dir_glom, filename), x)
         else:
             print("Whew ! Not a glomeruli ! There is still {0:.4f} % chance ".format(p))
-            Image.fromarray(x*255, mode='RGB').save(os.path.join(path_dir_nonglom, filename))
+            imsave(os.path.join(path_dir_nonglom, filename), x)
 
     print("DONE!")
-
 
 
 def plot_to_grid(batch, grid_size=None, random=False):
