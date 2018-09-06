@@ -27,6 +27,7 @@ def get_generators(image_dir, validation_pct=None):
         return gen_from_folders(image_dir)
     return gen_from_image_lists(image_dir, validation_pct)
 
+
 def gen_from_image_lists(image_dir, validation_pct=20):
     """
         Generate image batches for training and validation without physically splitting it on disk

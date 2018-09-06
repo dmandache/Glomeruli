@@ -218,7 +218,7 @@ def visualize_layer_weights(layer):
         filter_weights_img = _util.plot_to_grid(filter_weights)
         imsave('./output/weights/%s.png' % file_name, filter_weights_img)
     else:
-        print('Skipping layer %s with conv filters of size %d x %d' (layer.name, width, height))
+        print('Skipping layer %s with conv filters of size %d x %d' % (layer.name, width, height))
 
 
 def visualize_layer_activation_maps(model, layer, img, color_map=True):
