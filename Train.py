@@ -23,8 +23,7 @@ fine_tune_epoch = 0
 def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=False):
     global fine_tune_epoch
 
-    model = 'resnet'
-    transfer = True
+    model_name = model
 
     if dir == None:
         settings.IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/"
@@ -95,19 +94,19 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
     '''
 
     supported_models = ['inception','vgg','resnet','tiny']
-    if model not in supported_models:
+    if model_name not in supported_models:
         print("Invalid model ! Please specify one of this arguments : {}".format(supported_models))
         exit()
 
-    if model == 'tiny':
+    if model_name == 'tiny':
         model, history = Tiny.train(train_generator, validation_generator, callback_list)
     else:
         if transfer:
-            model, history = SoA.train_transfer(model, train_generator, validation_generator, callback_list)
+            model, history = SoA.train_transfer(model_name, train_generator, validation_generator, callback_list)
         elif finetune:
-            model, history = SoA.train_finetune(model, train_generator, validation_generator, callback_list)
+            model, history = SoA.train_finetune(model_name, train_generator, validation_generator, callback_list)
         else:
-            model, history = SoA.train_from_scratch(model, train_generator, validation_generator, callback_list)
+            model, history = SoA.train_from_scratch(model_name, train_generator, validation_generator, callback_list)
 
     '''
         Save metrics

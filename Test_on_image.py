@@ -19,24 +19,30 @@ IS_GLOMERULI = 0
 NOT_GLOMERULI = 1
 
 
-def main(path):
-    if path is None:
+def main(model, img):
+    if img is None:
         # IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/test"
         IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/glomeruli/542862_544892_3782094.png"
     else:
-        IMAGES_DIR_PATH = path
+        IMAGES_DIR_PATH = img
+
+    if model is None:
+        MODEL_PATH = './output/model.hdf5'
+        print('You shpuld specify the path to the model file.')
+    else:
+        MODEL_PATH = model
 
     # load image
     try:
         img = Image.open(IMAGES_DIR_PATH)
     except IOError:
-        print("Could not open image file ", path)
+        print("Could not open image file ", IMAGES_DIR_PATH)
         exit()
 
     target_size = (settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT)
 
     original_size = img.size
-    print("Resizing image {} from original size {} to target size {}.".format(path, original_size, target_size))
+    print("Resizing image {} from original size {} to target size {}.".format(IMAGES_DIR_PATH, original_size, target_size))
     # zero pad if smaller
     if original_size[0] < target_size[0] and original_size[1] < target_size[1]:
         img_new = Image.new("RGB", target_size)
@@ -51,9 +57,8 @@ def main(path):
     x /= 255
 
     # load model
-    model = load_model('./output/model.hdf5',
-                       custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
-                                       'specificity': specificity, 'f1_score': f1_score})
+    model = load_model(MODEL_PATH, custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
+                                                   'specificity': specificity, 'f1_score': f1_score})
 
     # model.summary()
 
@@ -65,11 +70,10 @@ def main(path):
     print(" I AM {0:.4f} % SURE THAT THIS IS A GLOMERULI !".format(glom_prob))
 
 
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--path', help='path to image')
+    parser.add_argument('--model', help='path to model')
+    parser.add_argument('--img', help='path to image')
     args = parser.parse_args()
 
     main(**vars(args))

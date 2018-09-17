@@ -21,14 +21,16 @@ def main(dir=None, model=None, out=None):
     else:
         IMAGES_DIR_PATH = dir
     if model is None:
-        print ('Please specify the path of the model to load')
-        exit()
+        MODEL_PATH = './output/model.hdf5'
+        print('You shpuld specify the path to the model file.')
+    else:
+        MODEL_PATH = model
 
     # Load all test samples
     x_test = Util.get_all_imgs_from_folder(dir=IMAGES_DIR_PATH, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
 
     # load model
-    model = load_model(model, custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
+    model = load_model(MODEL_PATH, custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
                                        'specificity': specificity, 'f1_score': f1_score})
 
     # model.summary()
