@@ -1,13 +1,5 @@
-## Glomeruli clasiffication using State of the Art models
+## Glomeruli classification using State of the Art models
 
-### Pull Repo
-
- `eval $(ssh-agent)` 
- 
-`ssh-add ~/.ssh/id_rsa` 
-
-`if cd Glomeruli; then git pull; else git clone https://github.com/dmandache/Glomeruli.git Glomeruli; fi; cd ~`
- 
 ### Train.py
 
 arguments:
