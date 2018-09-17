@@ -1,21 +1,15 @@
 from keras.models import load_model
-from MyMetrics import precision, recall, sensitivity, specificity, f1_score
+from Models.Metrics import precision, recall, sensitivity, specificity, f1_score
 
 import argparse
 
 import numpy as np
-import pickle
-from scipy.misc import imsave
 
 import matplotlib
 
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 
 from PIL import Image
-
-import _util
-import _vis
 
 import settings
 

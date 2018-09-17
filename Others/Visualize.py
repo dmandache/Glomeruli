@@ -2,16 +2,14 @@ from keras import backend as K
 from PIL import Image
 from scipy.misc import imsave
 import numpy as np
-import math
 import time
 import os
 
 import matplotlib
 matplotlib.use('Agg')
-import matplotlib.pyplot as plt
 from matplotlib import cm
 
-import _util
+from Others import Util
 import settings
 settings.init()
 
@@ -153,8 +151,8 @@ def visualize_conv_layer_max_activations(layer, model_input, img_shape=None, gra
     file_name = '%s_%d' % (layer.name, nb_filters)
 
     # save to file
-    filters_img = _util.plot_to_grid(filters)
-    filters_img = _util.gaussian_blur(filters_img)
+    filters_img = Util.plot_to_grid(filters)
+    filters_img = Util.gaussian_blur(filters_img)
 
     imsave('./output/filters/%s.png' % file_name, filters_img)
 
@@ -200,7 +198,7 @@ def visualize_concat_layer_max_activations(layer, model_input, img_shape=None, g
 
     img = deprocess_image(input_img_data[0])
 
-    img = _util.gaussian_blur(img)
+    img = Util.gaussian_blur(img)
 
     file_name = '%s' % layer.name
 
@@ -215,7 +213,7 @@ def visualize_layer_weights(layer):
     if width == height:
         filter_weights = np.swapaxes(weights, -1, 0)
         file_name = '%s_%d' % (layer.name, nb_filters)
-        filter_weights_img = _util.plot_to_grid(filter_weights)
+        filter_weights_img = Util.plot_to_grid(filter_weights)
         imsave('./output/weights/%s.png' % file_name, filter_weights_img)
     else:
         print('Skipping layer %s with conv filters of size %d x %d' % (layer.name, width, height))
@@ -235,9 +233,9 @@ def visualize_layer_activation_maps(model, layer, img, color_map=True):
     feature_maps = activations[0, :, :, :]
     feature_maps_swap = np.swapaxes(feature_maps, -1, 0)
     file_name = '%s_%d' % (layer.name, nb_maps)
-    maps_img = _util.plot_to_grid(feature_maps_swap)
+    maps_img = Util.plot_to_grid(feature_maps_swap)
     if color_map:
-        maps_img = _util.apply_jet_colormap(maps_img)
+        maps_img = Util.apply_jet_colormap(maps_img)
         file_name += '_jet'
     imsave('./output/activation_maps/%s.png' % file_name, maps_img)
 

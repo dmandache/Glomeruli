@@ -1,5 +1,5 @@
 from keras.models import load_model
-from MyMetrics import precision, recall, sensitivity, specificity, f1_score
+from Models.Metrics import precision, recall, sensitivity, specificity, f1_score
 
 import argparse
 
@@ -10,13 +10,11 @@ from scipy.misc import imsave
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-import seaborn as sns
 
-import _util
-import _vis
+from Others import Util
 
 import settings
-settings.init()
+
 
 
 def main(dir=None, n=None):
@@ -39,8 +37,8 @@ def main(dir=None, n=None):
     #x_test_nonglom = _util.get_n_samples(NB_SAMPLES, dir=DIR_NONGLOM, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
 
     # Load all test samples
-    x_test_glom = _util.get_all_imgs_from_folder(dir=DIR_GLOM, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
-    x_test_nonglom= _util.get_all_imgs_from_folder(dir=DIR_NONGLOM, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
+    x_test_glom = Util.get_all_imgs_from_folder(dir=DIR_GLOM, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
+    x_test_nonglom= Util.get_all_imgs_from_folder(dir=DIR_NONGLOM, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
 
     # load model
     model = load_model('./output/model.hdf5',
@@ -53,7 +51,7 @@ def main(dir=None, n=None):
     y_pred_glom = model.predict(x_test_glom).flatten()
     y_true_glom = list(np.zeros(len(y_pred_glom)))
 
-    glomeruli_examples = _util.plot_to_grid_with_proba(x_test_glom, y_pred_glom)
+    glomeruli_examples = Util.plot_to_grid_with_proba(x_test_glom, y_pred_glom)
     imsave('./output/%s.png' % 'glomeruli_examples', glomeruli_examples)
 
     # print('Those should be all zeros - nonglom 0')
@@ -61,7 +59,7 @@ def main(dir=None, n=None):
     y_true_nonglom = list(np.ones(len(y_pred_nonglom)))
     #print(y_test_nonglom.argmax(axis=-1)) # for categorical
 
-    non_glomeruli_examples = _util.plot_to_grid_with_proba(x_test_nonglom, y_pred_nonglom, grid_size=12, shuffle=True)
+    non_glomeruli_examples = Util.plot_to_grid_with_proba(x_test_nonglom, y_pred_nonglom, grid_size=12, shuffle=True)
     imsave('./output/%s.png' % 'non_glomeruli_examples', non_glomeruli_examples)
 
     img = x_test_glom[10, :, :, :]
@@ -93,7 +91,7 @@ def main(dir=None, n=None):
     n, bins, patches = plt.hist(y_proba, num_bins, facecolor='blue', log=True) #alpha=0.5)
     plt.savefig('test_nonglom_proba_dist.png')
 
-    _util.confusion_matrix(y_true, y_pred)
+    Util.confusion_matrix(y_true, y_pred)
 
     #_vis.visualize_model_max_activations(model, grad_step=0.5, grad_iter=300)
 

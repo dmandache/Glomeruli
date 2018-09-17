@@ -3,9 +3,9 @@ import shutil
 import numpy as np
 from keras.preprocessing.image import ImageDataGenerator
 from PIL import Image
-import FlyGenerator
+from Data import FlyGenerator
 import settings
-settings.init()
+
 
 train_data_gen_args = dict(rescale=1. / 255)
 '''
@@ -24,8 +24,14 @@ test_data_gen_args = dict(rescale=1. / 255)
 # add functionality for splitting folders
 def get_generators(image_dir, validation_pct=None):
     if validation_pct is None:
-        return gen_from_folders(image_dir)
-    return gen_from_image_lists(image_dir, validation_pct)
+        train_generator, validation_generator, num_train_samples, num_test_samples = gen_from_folders(image_dir)
+    else:
+        train_generator, validation_generator, num_train_samples, num_test_samples = gen_from_image_lists(image_dir, validation_pct)
+
+    settings.NUM_TRAIN_SAMPLES = num_train_samples
+    settings.NUM_TEST_SAMPLES = num_test_samples
+
+    return train_generator, validation_generator
 
 
 def gen_from_image_lists(image_dir, validation_pct=20):
@@ -109,7 +115,6 @@ def gen_from_folders(image_dir):
     TEST_DIR_PATH = image_dir + "/test"
 
     train_datagen = ImageDataGenerator(**train_data_gen_args)
-
     test_datagen = ImageDataGenerator(**test_data_gen_args)
 
     train_generator = train_datagen.flow_from_directory(

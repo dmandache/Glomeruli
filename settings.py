@@ -1,25 +1,26 @@
+class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
 
-def init():
-    global class_dict, class_weight, weight_glom
-    global DENSE_TRAIN_EPOCHS, FINE_TUNE_EPOCHS, NUM_CLASSES, CLASS_MODE, RANDOM_SEED
-    global BATCH_SIZE, MODEL_INPUT_WIDTH, MODEL_INPUT_HEIGHT, MODEL_INPUT_DEPTH
+weight_glom = 1
 
-    class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
+class_weight = {class_dict['nonglomeruli']: 1,  # 0 : 1
+                class_dict['glomeruli']: weight_glom}  # 1 : 25
 
-    weight_glom = 1
+DENSE_TRAIN_EPOCHS = 30
+FINE_TUNE_EPOCHS = 200
 
-    class_weight = {class_dict['nonglomeruli']: 1,  # 0 : 1
-                    class_dict['glomeruli']: weight_glom}  # 1 : 25
+NUM_CLASSES = 1
+RANDOM_SEED = None
+CLASS_MODE = 'binary'
 
-    DENSE_TRAIN_EPOCHS = 30
-    FINE_TUNE_EPOCHS = 200
+BATCH_SIZE = 64
 
-    NUM_CLASSES = 1
-    RANDOM_SEED = None
-    CLASS_MODE = 'binary'
+# default size will be changed according to the model chosen
+MODEL_INPUT_WIDTH = 299
+MODEL_INPUT_HEIGHT = 299
+MODEL_INPUT_DEPTH = 3
 
-    BATCH_SIZE = 64
+OUTPUT_DIR = './output'
 
-    MODEL_INPUT_WIDTH = 299
-    MODEL_INPUT_HEIGHT = 299
-    MODEL_INPUT_DEPTH = 3
+# will be given valuess in code
+NUM_TRAIN_SAMPLES = 0
+NUM_TEST_SAMPLES = 0

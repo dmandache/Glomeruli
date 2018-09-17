@@ -301,6 +301,12 @@ def create_image_lists(image_dir, validation_pct=10):
                 validation_images.append(base_name)
             else:
                 training_images.append(base_name)
+
+        print("Training on : ")
+        print(training_images)
+        print("Testing on : ")
+        print(validation_images)
+
         image_lists[label_name] = {
             'dir': dir_name,
             'training': training_images,

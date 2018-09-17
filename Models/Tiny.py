@@ -1,11 +1,11 @@
-from keras.models import Sequential
+from keras.models import Sequential, load_model
 from keras.layers import Conv2D, MaxPooling2D, Dense, Dropout, Activation, Flatten
 from keras import optimizers
 from keras import backend as K
-from MyMetrics import precision, recall, sensitivity, specificity, f1_score
+from Models.Metrics import precision, recall, sensitivity, specificity, f1_score
 
 import settings
-settings.init()
+
 
 # with img size (288, 288, 3) it has 7.6M parameters
 def get_model(num_classes=1):
@@ -99,3 +99,25 @@ def get_model(num_classes=1):
                   metrics=['accuracy', precision, recall, sensitivity, specificity, f1_score])
 
     return model
+
+
+def train_model(train_generator, validation_generator, callback_list):
+
+    model = get_model(settings.NUM_CLASSES)
+
+    model.summary()
+
+    history = model.fit_generator(
+        train_generator,
+        steps_per_epoch=settings.NUM_TRAIN_SAMPLES // settings.BATCH_SIZE,
+        validation_data=validation_generator,
+        validation_steps=settings.NUM_TEST_SAMPLES // settings.BATCH_SIZE,
+        epochs=settings.FINE_TUNE_EPOCHS,
+        class_weight=settings.class_weight,
+        callbacks=callback_list)
+
+    model = load_model(settings.OUTPUT_DIR+'/model.hdf5',
+                       custom_objects={'precision': precision,'recall': recall, 'sensitivity': sensitivity,
+                                       'specificity': specificity, 'f1_score': f1_score})
+
+    return model, history
