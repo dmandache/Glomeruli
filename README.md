@@ -5,7 +5,8 @@
 arguments:
 * `--dir` path to data directory
 * `--split` 
-  * validation split percentage (recommended value : 20), randomly splits the data in train and test (a list of images chosen for each dataste is printed)
+  * validation split percentage (recommended value : 20)
+  * randomly splits the data in train and test sets (a list of images chosen for each dataste is printed)
   * if argument is omitted, data dir should have the structure :
       ```
         +-- train
