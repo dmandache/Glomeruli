@@ -13,8 +13,6 @@ from PIL import Image
 
 import settings
 
-settings.init()
-
 IS_GLOMERULI = 0
 NOT_GLOMERULI = 1
 
@@ -32,6 +30,15 @@ def main(model, img):
     else:
         MODEL_PATH = model
 
+    if 'inception' in MODEL_PATH:
+        settings.MODEL_INPUT_WIDTH = 299
+        settings.MODEL_INPUT_HEIGHT = 299
+        settings.MODEL_INPUT_DEPTH = 3
+    elif 'resnet' or 'vgg' in MODEL_PATH:
+        settings.MODEL_INPUT_WIDTH = 224
+        settings.MODEL_INPUT_HEIGHT = 224
+        settings.MODEL_INPUT_DEPTH = 3
+
     # load image
     try:
         img = Image.open(IMAGES_DIR_PATH)
@@ -42,7 +49,8 @@ def main(model, img):
     target_size = (settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT)
 
     original_size = img.size
-    print("Resizing image {} from original size {} to target size {}.".format(IMAGES_DIR_PATH, original_size, target_size))
+    print("Resizing image {} from original size {} to target size {}.".format(IMAGES_DIR_PATH, original_size,
+                                                                              target_size))
     # zero pad if smaller
     if original_size[0] < target_size[0] and original_size[1] < target_size[1]:
         img_new = Image.new("RGB", target_size)
@@ -65,7 +73,7 @@ def main(model, img):
     # print('Those should be all ones - glom 1')
     y_pred = model.predict(x).flatten()
 
-    glom_prob = (1 - y_pred[0])*100
+    glom_prob = (1 - y_pred[0]) * 100
 
     print(" I AM {0:.4f} % SURE THAT THIS IS A GLOMERULI !".format(glom_prob))
 

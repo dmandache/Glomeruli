@@ -26,6 +26,14 @@ def main(dir=None, model=None, out=None):
     else:
         MODEL_PATH = model
 
+    if 'inception' in MODEL_PATH:
+        settings.MODEL_INPUT_WIDTH = 299
+        settings.MODEL_INPUT_HEIGHT = 299
+        settings.MODEL_INPUT_DEPTH = 3
+    elif 'resnet' or 'vgg' in MODEL_PATH:
+        settings.MODEL_INPUT_WIDTH = 224
+        settings.MODEL_INPUT_HEIGHT = 224
+
     # Load all test samples
     x_test = Util.get_all_imgs_from_folder(dir=IMAGES_DIR_PATH, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
 
