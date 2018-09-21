@@ -35,17 +35,20 @@ def get_base_model(model_name, weights='imagenet'):
         ALL_LAYERS = len(InceptionV3(weights=None, include_top=True).layers)
         TRAINABLE_LAYERS = 172
         FC_LAYER_SIZE = 1024
+
     elif model_name == 'vgg':
         base_model = VGG16(weights=weights, include_top=False)
         BASE_LAYERS = len(VGG16(weights=None, include_top=False).layers)    # 19
         ALL_LAYERS = len(VGG16(weights=None, include_top=True).layers)      # 23
         TRAINABLE_LAYERS = 11
         FC_LAYER_SIZE = 512
+
     elif model_name == 'resnet':
         base_model = ResNet50(weights=weights, include_top=False)           # 174
         BASE_LAYERS = len(ResNet50(weights=None, include_top=False).layers)
         ALL_LAYERS = len(ResNet50(weights=None, include_top=True).layers)
         TRAINABLE_LAYERS = 8
+
         FC_LAYER_SIZE = 1024
     print('\t {} model with {} base layers !'.format(model_name, BASE_LAYERS))
     return base_model
@@ -105,7 +108,6 @@ def get_mid_layer_model(model):
 '''
     Train model
 '''
-
 
 def train_finetune(model_name, train_generator, validation_generator, callback_list):
     global fine_tune_epoch

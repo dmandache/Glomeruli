@@ -77,7 +77,7 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
     checkpointer = ModelCheckpoint(
         filepath=settings.OUTPUT_DIR+'/model.hdf5',
         verbose=1,
-        monitor='val_f1_score',
+        monitor='val_acc',
         mode='max',
         save_best_only=True)
 
