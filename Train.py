@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 from Models.Metrics import precision, recall, sensitivity, specificity, f1_score
 import Data.GetData as Data
 from Models import SoA, Tiny
-import Test
 
 import settings
 
@@ -125,7 +124,6 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
     plt.ylabel('loss')
     plt.savefig(settings.OUTPUT_DIR+'/training_plot.png')
 
-    #Test.main(IMAGES_DIR_PATH + '/test')
 
 
 if __name__ == '__main__':

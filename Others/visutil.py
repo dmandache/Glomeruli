@@ -9,9 +9,8 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib import cm
 
-from Others import Util
+from Others import util
 import settings
-settings.init()
 
 '''
     Model functions
@@ -44,7 +43,7 @@ def visualize_model_max_activations(model, img_shape=None,  grad_step=1.0, grad_
             creates an image file "filters_[layer_name]_[nb_filters].png" containing the filters of each layer in model
 
     """
-    os.makedirs('./output/filters/', exist_ok=True)
+    os.makedirs(settings.OUTPUT_DIR+'/filters/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting maximum activations of layer ', layer.name)
@@ -55,7 +54,7 @@ def visualize_model_max_activations(model, img_shape=None,  grad_step=1.0, grad_
 
 
 def visualize_model_weights(model):
-    os.makedirs('./output/weights/', exist_ok=True)
+    os.makedirs(settings.OUTPUT_DIR+'/weights/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting weights of layer ', layer.name)
@@ -63,7 +62,7 @@ def visualize_model_weights(model):
 
 
 def visualize_model_activation_maps(model, img, color_map=True):
-    os.makedirs('./output/activation_maps/', exist_ok=True)
+    os.makedirs(settings.OUTPUT_DIR+'/activation_maps/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
             print('Plotting activation maps of layer ', layer.name)
@@ -151,10 +150,10 @@ def visualize_conv_layer_max_activations(layer, model_input, img_shape=None, gra
     file_name = '%s_%d' % (layer.name, nb_filters)
 
     # save to file
-    filters_img = Util.plot_to_grid(filters)
-    filters_img = Util.gaussian_blur(filters_img)
+    filters_img = util.plot_to_grid(filters)
+    filters_img = util.gaussian_blur(filters_img)
 
-    imsave('./output/filters/%s.png' % file_name, filters_img)
+    imsave(settings.OUTPUT_DIR+'/filters/%s.png' % file_name, filters_img)
 
 
 def visualize_concat_layer_max_activations(layer, model_input, img_shape=None, grad_step=1.0, grad_iter=100,
@@ -198,11 +197,11 @@ def visualize_concat_layer_max_activations(layer, model_input, img_shape=None, g
 
     img = deprocess_image(input_img_data[0])
 
-    img = Util.gaussian_blur(img)
+    img = util.gaussian_blur(img)
 
     file_name = '%s' % layer.name
 
-    imsave('./output/filters/%s.png' % file_name, img)
+    imsave(settings.OUTPUT_DIR+'/filters/%s.png' % file_name, img)
 
 
 def visualize_layer_weights(layer):
@@ -213,8 +212,8 @@ def visualize_layer_weights(layer):
     if width == height:
         filter_weights = np.swapaxes(weights, -1, 0)
         file_name = '%s_%d' % (layer.name, nb_filters)
-        filter_weights_img = Util.plot_to_grid(filter_weights)
-        imsave('./output/weights/%s.png' % file_name, filter_weights_img)
+        filter_weights_img = util.plot_to_grid(filter_weights)
+        imsave(settings.OUTPUT_DIR+'/weights/%s.png' % file_name, filter_weights_img)
     else:
         print('Skipping layer %s with conv filters of size %d x %d' % (layer.name, width, height))
 
@@ -233,14 +232,14 @@ def visualize_layer_activation_maps(model, layer, img, color_map=True):
     feature_maps = activations[0, :, :, :]
     feature_maps_swap = np.swapaxes(feature_maps, -1, 0)
     file_name = '%s_%d' % (layer.name, nb_maps)
-    maps_img = Util.plot_to_grid(feature_maps_swap)
+    maps_img = util.plot_to_grid(feature_maps_swap)
     if color_map:
-        maps_img = Util.apply_jet_colormap(maps_img)
+        maps_img = util.apply_jet_colormap(maps_img)
         file_name += '_jet'
-    imsave('./output/activation_maps/%s.png' % file_name, maps_img)
+    imsave(settings.OUTPUT_DIR+'/activation_maps/%s.png' % file_name, maps_img)
 
 
-# doesn't work
+#TODO doesn't work
 def visualize_class_activation_map(model, img, output_path):
     _, width, height, ch = img.shape
 
@@ -284,6 +283,7 @@ def deprocess_image(x):
         x = x.transpose((1, 2, 0))
     x = np.clip(x, 0, 255).astype('uint8')
     return x
+
 
 # utility function to normalize a tensor by its L2 norm
 def normalize(x):
