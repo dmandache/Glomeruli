@@ -222,7 +222,11 @@ def visualize_layer_weights(layer):
 
 
 
-def visualize_layer_activation_maps(model, layer, img, color_map=True):
+def visualize_layer_activation_maps(model, layer, img, color_map=None):
+    # color_map :
+    #   - individual (every filter has its colormap - this way weak filters don't get overshadowed by high values)
+    #   - common (same colormap for all filters - observe dominant filters)
+    #   - None (true value)
 
     get_activations = K.function([model.layers[0].input, K.learning_phase()], [layer.output, ])
     activations = get_activations([img, 0])[0]
@@ -232,14 +236,28 @@ def visualize_layer_activation_maps(model, layer, img, color_map=True):
         raise Exception("Feature map of '{}' has {} dimensions which is not supported.".format(layer.name, activations.ndim))
 
     print(activations.shape)
-    nb_maps = activations.shape[-1]
+
     feature_maps = activations[0, :, :, :]
-    feature_maps_swap = np.swapaxes(feature_maps, -1, 0)
+    feature_maps = np.moveaxis(feature_maps, -1, 0)  # [nb_maps, w_map, h_map]
+
+    nb_maps, w_map, h_map = feature_maps.shape
     file_name = '%s_%d' % (layer.name, nb_maps)
-    maps_img = util.plot_to_grid(feature_maps_swap)
-    if color_map:
+
+    if color_map is None:
+        maps_img = util.plot_to_grid(feature_maps)
+
+    if color_map == 'individual':
+        feature_maps_cm = np.empty([nb_maps, w_map, h_map, 4])
+        for i in range(nb_maps):
+            feature_maps_cm[i,:,:,:] = np.array(util.apply_jet_colormap(feature_maps[i,:,:]))
+        maps_img = util.plot_to_grid(feature_maps_cm)
+        file_name += '_individual-jet'
+
+    if color_map == 'common':
+        maps_img = util.plot_to_grid(feature_maps)
         maps_img = util.apply_jet_colormap(maps_img)
-        file_name += '_jet'
+        file_name += '_common-jet'
+
     imsave(settings.OUTPUT_DIR+'/activation_maps/%s.png' % file_name, maps_img)
 
 

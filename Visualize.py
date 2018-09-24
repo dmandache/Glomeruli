@@ -12,6 +12,7 @@ import settings
 
 
 def main(out=None, model=None, activations=None, img=None, maxinput=None, weights=None):
+    activations=True
 
     if model is None:
         MODEL_PATH = '/Users/diana/Desktop/Glomeruli InceptionV3/model.hdf5'
@@ -82,7 +83,9 @@ def main(out=None, model=None, activations=None, img=None, maxinput=None, weight
     if weights:
         visutil.visualize_model_weights(model)
     if activations:
-        visutil.visualize_model_activation_maps(model, im_resized)
+        visutil.visualize_model_activation_maps(model, im_resized, color_map='individual')
+        visutil.visualize_model_activation_maps(model, im_resized, color_map='common')
+        visutil.visualize_model_activation_maps(model, im_resized, color_map=None)
     if maxinput:
         visutil.visualize_model_max_activations(model, (settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT, settings.MODEL_INPUT_DEPTH))
 
