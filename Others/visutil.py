@@ -57,8 +57,14 @@ def visualize_model_weights(model):
     os.makedirs(settings.OUTPUT_DIR+'/weights/', exist_ok=True)
     for layer in model.layers:
         if 'conv' in layer.name:
-            print('Plotting weights of layer ', layer.name)
-            visualize_layer_weights(layer)
+            weights = layer.get_weights()[0]
+            width, height, ch, nb_filters = weights.shape
+            if width == height != 1: # plot only square filters
+                print('Plotting weights of layer {} with {} filters of size {}x{}x{}'.format(layer.name, nb_filters, width, height, ch))
+                visualize_layer_weights(layer)
+            else:
+                print('Skipping layer {} with {} filters of size {}x{}x{}'.format(layer.name, nb_filters, width, height, ch))
+                continue
 
 
 def visualize_model_activation_maps(model, img, color_map=True):
@@ -206,16 +212,14 @@ def visualize_concat_layer_max_activations(layer, model_input, img_shape=None, g
 
 def visualize_layer_weights(layer):
     weights = layer.get_weights()[0]
-    weights = weights[:, :, 0, :]
-    width, height, nb_filters = weights.shape
-    # only plot square conv filters
-    if width == height:
-        filter_weights = np.swapaxes(weights, -1, 0)
-        file_name = '%s_%d' % (layer.name, nb_filters)
-        filter_weights_img = util.plot_to_grid(filter_weights)
-        imsave(settings.OUTPUT_DIR+'/weights/%s.png' % file_name, filter_weights_img)
-    else:
-        print('Skipping layer %s with conv filters of size %d x %d' % (layer.name, width, height))
+    #weights = weights[:, :, 0, :]
+    width, height, ch, nb_filters = weights.shape
+    weights = weights[:, :, 0:min(ch,3), :]
+    weights = np.moveaxis(weights, -1, 0)
+    file_name = '%s_%d' % (layer.name, nb_filters)
+    weights_img = util.plot_to_grid(weights)
+    imsave(settings.OUTPUT_DIR+'/weights/%s.png' % file_name, weights_img)
+
 
 
 def visualize_layer_activation_maps(model, layer, img, color_map=True):

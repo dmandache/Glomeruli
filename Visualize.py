@@ -14,14 +14,14 @@ import settings
 def main(out=None, model=None, activations=None, img=None, maxinput=None, weights=None):
 
     if model is None:
-        MODEL_PATH = './output/model.hdf5'
+        MODEL_PATH = '/Users/diana/Desktop/Glomeruli InceptionV3/model.hdf5'
         print('You should specify the path to the model file.')
     else:
         MODEL_PATH = model
 
     models = ['inception', 'vgg', 'resnet', 'tiny']
     for m in models:
-        if m in MODEL_PATH:
+        if m in MODEL_PATH.lower():
             MODEL_NAME = m
 
     if out == None:
@@ -42,7 +42,7 @@ def main(out=None, model=None, activations=None, img=None, maxinput=None, weight
         settings.MODEL_INPUT_HEIGHT = 224
         settings.MODEL_INPUT_DEPTH = 3
 
-    if activations is None and maxinput is None and weights is None:
+    if not activations and not maxinput and not weights:
         activations = True
         maxinput = True
         weights = True
