@@ -57,6 +57,7 @@ def get_n_samples(n=32, dir=None, target_size=(299,299)):
 
 def get_all_imgs_from_folder(dir, target_size=(299,299)):
     samples = []
+    samples_name= []
     files = os.listdir(dir)
 
     for f in files:
@@ -83,12 +84,14 @@ def get_all_imgs_from_folder(dir, target_size=(299,299)):
         x /= 255
         samples.append(x)
 
+        samples_name.append(os.path.splitext(f)[0])
+
     samples = np.stack(samples, axis=0)
     # samples = np.expand_dims(samples, axis=3)
-    return samples
+    return samples, samples_name
 
 
-def prediction_to_folder(images, proba, path_dir=None):
+def prediction_to_folder(images, image_names, proba, path_dir=None):
     if path_dir is None:
         path_dir = './glom_prediction'
 
@@ -105,7 +108,7 @@ def prediction_to_folder(images, proba, path_dir=None):
 
     for idx, x in enumerate(images):
         p = (1-proba[idx]) * 100
-        filename = "{0}_{1:.3f}%.png".format(idx,p)
+        filename = "{0}_{1:.3f}%.png".format(image_names[idx],p)
         if p >= 50:
             print("Found a glomeruli, I am {0:.4f} % sure !".format(p))
             imsave(os.path.join(path_dir_glom, filename), x)

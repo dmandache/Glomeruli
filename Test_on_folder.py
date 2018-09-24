@@ -34,7 +34,7 @@ def main(dir=None, model=None, out=None):
         settings.MODEL_INPUT_HEIGHT = 224
 
     # Load all test samples
-    x_test = util.get_all_imgs_from_folder(dir=IMAGES_DIR_PATH, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
+    x_test, x_filename = util.get_all_imgs_from_folder(dir=IMAGES_DIR_PATH, target_size=(settings.MODEL_INPUT_WIDTH, settings.MODEL_INPUT_HEIGHT))
 
     # load model
     model = load_model(MODEL_PATH, custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
@@ -48,7 +48,7 @@ def main(dir=None, model=None, out=None):
 
     y_max = y_proba.argmax(axis=-1)
 
-    util.prediction_to_folder(x_test, y_proba, out)
+    util.prediction_to_folder(x_test, x_filename, y_proba, out)
 
     with open('y_proba', 'w', newline='') as myfile:
         wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
