@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use('Agg')
 from matplotlib import cm
 
-from Others import util
+from Util import util
 import settings
 
 '''
@@ -310,3 +310,29 @@ def deprocess_image(x):
 # utility function to normalize a tensor by its L2 norm
 def normalize(x):
     return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
+
+#TODO
+def tsne(model, X, Y, layer_of_interest=-2):
+
+    intermediate_tensor_function = K.function([model.layers[0].input], [model.layers[layer_of_interest].output])
+    intermediate_tensor = intermediate_tensor_function([X.iloc[0, :].values.reshape(1, -1)])[0]
+
+    intermediates = []
+    color_intermediates = []
+    for i in range(len(X)):
+        output_class = np.argmax(Y.iloc[i, :].values)
+        intermediate_tensor = intermediate_tensor_function([X.iloc[i, :].values.reshape(1, -1)])[0]
+        intermediates.append(intermediate_tensor[0])
+        if (output_class == 0):
+            color_intermediates.append("#0000ff")
+        else:
+            color_intermediates.append("#ff0000")
+
+    from sklearn.manifold import TSNE
+    tsne = TSNE(n_components=2, random_state=0)
+    intermediates_tsne = tsne.fit_transform(intermediates)
+
+    import matplotlib.pyplot as plt
+    plt.figure(figsize=(8, 8))
+    plt.scatter(x=intermediates_tsne[:, 0], y=intermediates_tsne[:, 1], color=color_intermediates)
+    plt.show()

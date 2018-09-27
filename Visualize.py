@@ -7,7 +7,7 @@ from PIL import Image
 
 
 from Models.Metrics import precision, recall, sensitivity, specificity, f1_score
-from Others import visutil
+from Util import visutil
 import settings
 
 

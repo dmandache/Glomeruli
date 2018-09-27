@@ -19,8 +19,8 @@ NOT_GLOMERULI = 1
 
 def main(model, img):
     if img is None:
-        # IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/test"
-        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/data/glomeruli/542862_544892_3782094.png"
+        #IMAGES_DIR_PATH = "/Volumes/Raid1Data/2018_Glomeruli/data/glomeruli/542862_544892_3782094.png"
+        IMAGES_DIR_PATH="/Volumes/Raid1Data/2018_Glomeruli/small_test/nonglomeruli/1028_12141908.png"
     else:
         IMAGES_DIR_PATH = img
 
@@ -34,7 +34,7 @@ def main(model, img):
         settings.MODEL_INPUT_WIDTH = 299
         settings.MODEL_INPUT_HEIGHT = 299
         settings.MODEL_INPUT_DEPTH = 3
-    elif 'resnet' or 'vgg' in MODEL_PATH:
+    elif 'resnet' in MODEL_PATH or 'vgg' in MODEL_PATH:
         settings.MODEL_INPUT_WIDTH = 224
         settings.MODEL_INPUT_HEIGHT = 224
         settings.MODEL_INPUT_DEPTH = 3
@@ -72,6 +72,8 @@ def main(model, img):
 
     # print('Those should be all ones - glom 1')
     y_pred = model.predict(x).flatten()
+
+    print(y_pred)
 
     glom_prob = (1 - y_pred[0]) * 100
 

@@ -9,14 +9,14 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
-from Others import util
+from Util import util
 import settings
 
 
 def main(dir=None, model=None, out=None):
     if dir is None:
         # IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/test"
-        IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/small_test"
+        IMAGES_DIR_PATH = "/Volumes/Raid1Data/2018_Glomeruli/small_test"
     else:
         IMAGES_DIR_PATH = dir
     if model is None:
@@ -29,7 +29,7 @@ def main(dir=None, model=None, out=None):
         settings.MODEL_INPUT_WIDTH = 299
         settings.MODEL_INPUT_HEIGHT = 299
         settings.MODEL_INPUT_DEPTH = 3
-    elif 'resnet' or 'vgg' in MODEL_PATH:
+    elif 'resnet' in MODEL_PATH or 'vgg' in MODEL_PATH:
         settings.MODEL_INPUT_WIDTH = 224
         settings.MODEL_INPUT_HEIGHT = 224
 
@@ -50,10 +50,6 @@ def main(dir=None, model=None, out=None):
 
     util.prediction_to_folder(x_test, x_filename, y_proba, out)
 
-    with open('y_proba', 'w', newline='') as myfile:
-        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
-        wr.writerow(y_proba)
-
     '''
 
      prob dist
@@ -64,7 +60,7 @@ def main(dir=None, model=None, out=None):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description='Test model on images folder. Ground truth unknown.')
     parser.add_argument('--dir', help='data directory')
     parser.add_argument('--model', help='model filepath')
     parser.add_argument('--out', help='output directory')

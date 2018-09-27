@@ -80,10 +80,11 @@ def get_all_imgs_from_folder(dir, target_size=(299,299)):
             img_new = Image.Image.resize(img, target_size)
         else:
             img_new = img
+
         x = np.asarray(img_new, dtype='float32')
         x /= 255
-        samples.append(x)
 
+        samples.append(x)
         samples_name.append(os.path.splitext(f)[0])
 
     samples = np.stack(samples, axis=0)
@@ -115,6 +116,50 @@ def prediction_to_folder(images, image_names, proba, path_dir=None):
         else:
             print("Whew ! Not a glomeruli ! There is still {0:.4f} % chance ".format(p))
             imsave(os.path.join(path_dir_nonglom, filename), x)
+
+    print("DONE!")
+
+
+def prediction_to_folder(images, image_names, true_class, pred_class, pred_proba, path_dir=None):
+    if path_dir is None:
+        path_dir = './glom_prediction'
+
+    if not os.path.exists(path_dir):
+        os.makedirs(path_dir)
+
+    path_dir_tp = os.path.join(path_dir, 'true_positives')
+    if not os.path.exists(path_dir_tp):
+        os.makedirs(path_dir_tp)
+
+    path_dir_tn = os.path.join(path_dir, 'true_negatives')
+    if not os.path.exists(path_dir_tn):
+        os.makedirs(path_dir_tn)
+
+    path_dir_fp = os.path.join(path_dir, 'false_positives')
+    if not os.path.exists(path_dir_fp):
+        os.makedirs(path_dir_fp)
+
+    path_dir_fn = os.path.join(path_dir, 'false_negatives')
+    if not os.path.exists(path_dir_fn):
+        os.makedirs(path_dir_fn)
+
+    label = {'glomeruli': 0,
+             'nonglomeruli': 1}
+
+    for idx, x in enumerate(images):
+
+        if true_class[idx] == pred_class[idx] == label['glomeruli']:                           #   True Positives
+            dest_dir = path_dir_tp
+        if pred_class[idx] == label['glomeruli'] and true_class[idx] != pred_class[idx]:       #   False Positives
+            dest_dir = path_dir_fp
+        if true_class[idx] == pred_class[idx] == label['nonglomeruli']:                        #   True Negatives
+            dest_dir = path_dir_tn
+        if pred_class[idx] == label['nonglomeruli'] and true_class[idx] != pred_class[idx]:
+            dest_dir = path_dir_fn
+
+        p = (1 - pred_proba[idx]) * 100
+        filename = "{0}_{1:.3f}%.png".format(image_names[idx],p)
+        imsave(os.path.join(dest_dir, filename), x)
 
     print("DONE!")
 
