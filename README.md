@@ -25,8 +25,34 @@ arguments:
     * if both `--finetune` and `--transfer` are omitted, then the model is trained from scratch
 
 
-### Test_on_folder.py
+### Test_on_folder_blind.py
+
+Test model on images folder. Ground truth unknown.
 
 arguments:
 * `--dir` path to data directory
 * `--model` path to saved (trained) model
+
+### Test_on_folders.py
+
+Test model on images organized in glomeruli / nonglomeruli subfolders.
+
+arguments:
+* `--dir` path to data directory
+* `--model` path to saved (trained) model
+
+### Test_on_patch.py
+
+Test model on single image (patch, not WSI).
+
+arguments:
+* `--dir` path to data directory
+* `--model` path to saved (trained) model
+
+### Visualize.py
+
+* `--model` path to saved (trained) model
+* `--weights` mention if you want to plot the **weights** of the model
+* `--activations` mention if you want to plot the **filter activations** of the model
+    * `--img` path to image to plot activations for
+* `--maxinput` mention if you want to plot the **maxmum filter activation** of the model
