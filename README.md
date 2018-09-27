@@ -28,6 +28,12 @@ arguments:
 ### Test_on_folder_blind.py
 
 Test model on images folder. Ground truth unknown.
+Images split according to prediction as follows:
+      ```
+        +-- glom_prediction
+        |   +-- glomeruli
+        |   +-- nonglomeruli
+      ```
 
 arguments:
 * `--dir` path to data directory
@@ -35,7 +41,15 @@ arguments:
 
 ### Test_on_folders.py
 
-Test model on images organized in glomeruli / nonglomeruli subfolders.
+Test model on images organized in glomeruli / nonglomeruli subfolders (ground truth known).
+Images split according to prediction as follows:
+      ```
+        +-- glom_prediction
+        |   +-- false_negatives
+        |   +-- false_positives
+        |   +-- true_negatives
+        |   +-- true_positives
+      ```
 
 arguments:
 * `--dir` path to data directory
