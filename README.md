@@ -1,6 +1,6 @@
 ## Glomeruli classification using State of the Art models
 
-### Train.py
+## Train.py
 
 arguments:
 * `--dir` path to data directory
@@ -25,7 +25,7 @@ arguments:
     * if both `--finetune` and `--transfer` are omitted, then the model is trained from scratch
 
 
-### Test_on_folder_blind.py
+## Test_on_folder_blind.py
 
 Test model on images folder. Ground truth unknown.
 Images split according to prediction as follows:
@@ -55,7 +55,7 @@ arguments:
 * `--dir` path to data directory
 * `--model` path to saved (trained) model
 
-### Test_on_patch.py
+## Test_on_patch.py
 
 Test model on single image (patch, not WSI).
 
@@ -63,7 +63,7 @@ arguments:
 * `--dir` path to data directory
 * `--model` path to saved (trained) model
 
-### Visualize.py
+## Visualize.py
 
 * `--model` path to saved (trained) model
 * `--weights` mention if you want to plot the **weights** of the model
