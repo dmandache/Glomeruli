@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 
 
-# doesn't work
 def confusion_matrix(y_true, y_pred):
     raw_data = {'actual': y_true,
                 'preds': y_pred}
@@ -77,7 +76,7 @@ def get_all_imgs_from_folder(dir, target_size=(299,299)):
                 img_new.paste(img, ((target_size[0] - original_size[0]) // 2,
                                   (target_size[1] - original_size[1]) // 2))
             '''
-            img_new = Image.Image.resize(img, target_size)
+            img_new = img.resize(target_size, Image.ANTIALIAS)
         else:
             img_new = img
 
@@ -304,38 +303,10 @@ def gaussian_blur(img, kernel=2):
     return pil_img
 
 
-# useless, keep it fpr syntax
+# useless, keep it for syntax
 def merge_history_dicts(d1, d2, epoch):
     if isinstance(d1, dict):
         d2 = {key: {key_ + epoch: val_ for key_, val_ in val.items()}
                      for key, val in d2.items()}
     d = {key: (d1[key], d2[key]) for key in d2}
     return d
-
-
-def find_true_pred(y_actual, y_pred, x):
-    TP = []
-    FP = []
-    TN = []
-    FN = []
-    for i in range(len(y_pred)):
-        if y_actual[i]==y_pred[i]==1:
-           TP.append(x[i,:,:,:])
-    for i in range(len(y_pred)):
-        if y_pred[i]==1 and y_actual[i]==0:
-           FP.append(x[i,:,:,:])
-    for i in range(len(y_pred)):
-        if y_actual[i]==y_pred[i]==0:
-           TN.append(x[i,:,:,:])
-    for i in range(len(y_pred)):
-        if y_pred[i]==0 and y_actual[i]==1:
-           FN.append(x[i,:,:,:])
-    if TP:
-        imsave("true_positives.png", TP)
-    if FP:
-        imsave("false_positives.png", FP)
-    if TN:
-        imsave("true_negatives.png", TN)
-    if FN:
-        imsave("false_negatives.png", FN)
-    return(TP, FP, TN, FN)

@@ -70,7 +70,7 @@ def main(dir=None, model=None, out=None):
     y_proba = model.predict(x_test).flatten()
     y_class = np.around(y_proba)
 
-    util.prediction_to_folder(x_test, x_filename, y_test, y_class, y_proba, out)
+    util.prediction_to_folder(images=x_test, image_names=x_filename, true_class=y_test, pred_class=y_class, pred_proba=y_proba, path_dir=out)
 
     util.confusion_matrix(y_test, y_class)
 

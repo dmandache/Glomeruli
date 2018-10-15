@@ -311,17 +311,21 @@ def deprocess_image(x):
 def normalize(x):
     return x / (K.sqrt(K.mean(K.square(x))) + 1e-5)
 
+
 #TODO
 def tsne(model, X, Y, layer_of_interest=-2):
 
+    im = X[0, ...]
+
     intermediate_tensor_function = K.function([model.layers[0].input], [model.layers[layer_of_interest].output])
-    intermediate_tensor = intermediate_tensor_function([X.iloc[0, :].values.reshape(1, -1)])[0]
+    intermediate_tensor = intermediate_tensor_function([np.expand_dims(X[0, ...], axis=0)])[0]
 
     intermediates = []
     color_intermediates = []
     for i in range(len(X)):
-        output_class = np.argmax(Y.iloc[i, :].values)
-        intermediate_tensor = intermediate_tensor_function([X.iloc[i, :].values.reshape(1, -1)])[0]
+        output_class = Y[i]
+        #intermediate_tensor = intermediate_tensor_function([X[i, ...].reshape(1, -1)])[0]
+        intermediate_tensor = intermediate_tensor_function([np.expand_dims(X[0, ...], axis=0)])[0]
         intermediates.append(intermediate_tensor[0])
         if (output_class == 0):
             color_intermediates.append("#0000ff")
@@ -335,4 +339,4 @@ def tsne(model, X, Y, layer_of_interest=-2):
     import matplotlib.pyplot as plt
     plt.figure(figsize=(8, 8))
     plt.scatter(x=intermediates_tsne[:, 0], y=intermediates_tsne[:, 1], color=color_intermediates)
-    plt.show()
+    plt.savefig("tsne.png")

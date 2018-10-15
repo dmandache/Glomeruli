@@ -48,7 +48,7 @@ def main(dir=None, model=None, out=None):
 
     y_max = y_proba.argmax(axis=-1)
 
-    util.prediction_to_folder(x_test, x_filename, y_proba, out)
+    util.prediction_to_folder(images=x_test, image_names=x_filename, proba=y_proba, path_dir=out)
 
     '''
 
