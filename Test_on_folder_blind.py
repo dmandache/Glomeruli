@@ -16,7 +16,7 @@ import settings
 def main(dir=None, model=None, out=None):
     if dir is None:
         # IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/test"
-        IMAGES_DIR_PATH = "/Volumes/Raid1Data/2018_Glomeruli/small_test"
+        IMAGES_DIR_PATH = "/Volumes/Raid1Data/2018_Glomeruli/small_test/glomeruli"
     else:
         IMAGES_DIR_PATH = dir
     if model is None:
@@ -48,7 +48,7 @@ def main(dir=None, model=None, out=None):
 
     y_max = y_proba.argmax(axis=-1)
 
-    util.prediction_to_folder(images=x_test, image_names=x_filename, proba=y_proba, path_dir=out)
+    util.prediction_to_folder_no_truth(images=x_test, image_names=x_filename, proba=y_proba, path_dir=out)
 
     '''
 

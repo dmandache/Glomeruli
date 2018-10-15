@@ -91,7 +91,7 @@ def get_all_imgs_from_folder(dir, target_size=(299,299)):
     return samples, samples_name
 
 
-def prediction_to_folder(images, image_names, proba, path_dir=None):
+def prediction_to_folder_no_truth(images, image_names, proba, path_dir=None):
     if path_dir is None:
         path_dir = './glom_prediction'
 
