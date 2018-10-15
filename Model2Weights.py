@@ -29,5 +29,5 @@ print("Saved model to disk")
 
 
 with open("model.json", "r") as json_file:
-    json_string = json.load(json_file.read())
+    json_string = json.load(json_file)
     model = model_from_json(json_string)
