@@ -19,7 +19,7 @@ import settings
 fine_tune_epoch = 0
 
 
-def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=False):
+def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=False, epochs=None):
     global fine_tune_epoch
 
     model_name = model
@@ -61,6 +61,9 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
         settings.MODEL_INPUT_HEIGHT = 224
         settings.MODEL_INPUT_DEPTH = 3
 
+    if epochs is not None:
+        settings.DENSE_TRAIN_EPOCHS = int(epochs)
+
 
     '''
         Get data generators
@@ -81,7 +84,7 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
         save_best_only=True)
 
     # Helper: Stop when we stop learning.
-    early_stopper = EarlyStopping(patience=100)
+    early_stopper = EarlyStopping(patience=200)
 
     # Helper: TensorBoard
     tensorboard = TensorBoard(log_dir=settings.OUTPUT_DIR+'/tensorboard')
@@ -135,6 +138,7 @@ if __name__ == '__main__':
     parser.add_argument('--model', help='inception / vgg / resnet / tiny')
     parser.add_argument('--finetune', dest='finetune', default=False, action='store_true')
     parser.add_argument('--transfer', dest='transfer', default=False, action='store_true')
+    parser.add_argument('--epochs', help='number of epochs')
     args = parser.parse_args()
 
     main(**vars(args))

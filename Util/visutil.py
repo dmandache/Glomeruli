@@ -262,25 +262,31 @@ def visualize_layer_activation_maps(model, layer, img, color_map=None):
 
 
 #TODO doesn't work
-def visualize_class_activation_map(model, img, output_path):
+def visualize_class_activation_map(model, img, output_path, target_clsss=1, final_conv_layer_name='conv2d_266'):
     _, width, height, ch = img.shape
 
     # Get the 512 input weights to the softmax.
-    class_weights = model.layers[-2].get_weights()[0]
-    final_conv_layer = model.get_layer("conv2d_266")
-    get_output = K.function([model.layers[0].input], [final_conv_layer.output, model.layers[-2].output])
+    class_weights = model.layers[-1].get_weights()[0]
+    final_conv_layer = model.get_layer(final_conv_layer_name)
+    get_output = K.function([model.layers[0].input],
+                            [final_conv_layer.output, model.layers[-1].output])
     [conv_outputs, predictions] = get_output([img])
     conv_outputs = conv_outputs[0, :, :, :]
 
     # Create the class activation map.
-    cam = np.zeros(dtype=np.float32, shape=conv_outputs.shape[1:3])
-    for i, w in enumerate(class_weights[:, 1]):
-        cam += w * conv_outputs[i, :, :]
-    print("predictions", predictions)
+    cam = np.zeros(dtype=np.float32, shape=conv_outputs.shape[0:2])
+    for i, w in enumerate(class_weights[target_clsss, :]):
+        cam += w * conv_outputs[:, :, i]
+
+    # might need gaussian filter for better viz
     cam /= np.max(cam)
-    cam_new = Image.Image.resize(cam, (height, width))
-    cam_new = Image.fromarray(np.uint8(cm. jet(cam_new) * 255))
-    cam_new.save(output_path)
+
+    heatmap = Image.fromarray(np.uint8(cm.jet(cam) * 255))
+    heatmap = heatmap.resize((height, width), Image.ANTIALIAS)
+
+    heatmap[np.where(np.asarra(heatmap) < 0.2)] = 0
+    img_cam = heatmap * 0.5 + img
+    img_cam.save(output_path)
 
 
 '''
