@@ -261,7 +261,9 @@ def visualize_layer_activation_maps(model, layer, img, color_map=None):
     imsave(settings.OUTPUT_DIR+'/activation_maps/%s.png' % file_name, maps_img)
 
 
-#TODO doesn't work
+#TODO (confused) find relation - path from filter to output
+# i think it works only when there is a conv layer close to the last FC layer
+# so you can get the filters with high weight in the output
 def visualize_class_activation_map(model, img, output_path, target_clsss=1, final_conv_layer_name='conv2d_266'):
     _, width, height, ch = img.shape
 
@@ -275,18 +277,93 @@ def visualize_class_activation_map(model, img, output_path, target_clsss=1, fina
 
     # Create the class activation map.
     cam = np.zeros(dtype=np.float32, shape=conv_outputs.shape[0:2])
-    for i, w in enumerate(class_weights[target_clsss, :]):
+    print(conv_outputs.shape)
+    print(class_weights.shape)
+    print(predictions)
+    print("\tidx\tweight")
+    for i, w in enumerate(class_weights[target_clsss, :], 0):
+        print("\t{}\t{}".format(i,w))
         cam += w * conv_outputs[:, :, i]
 
     # might need gaussian filter for better viz
-    cam /= np.max(cam)
+    cam /= np.max(cam)                                                              # rescale to [0,1]
+    cam = np.asarray(Image.fromarray(cam).resize((height, width), Image.ANTIALIAS)) # resize from filter_size to input_size
+    heatmap = Image.fromarray(np.uint8(cm.jet(cam) * 255))                          # add Jet colormap
+    heatmap_np = np.asarray(heatmap).copy()
+    heatmap_np[np.where(cam < 0.2)] = 0                                             # remove small activations
+    heatmap_np = heatmap_np / np.max(heatmap_np)                                    # rescale to [0,1]
+    img_cam = heatmap_np[:,:,0:3] * 0.5 + img[0]                                    # superpose heatmap and input image
+    img_cam /= np.max(img_cam)                                                      # rescale to [0,1]
+    Image.fromarray(np.uint8(img_cam * 255)).save(output_path)
 
-    heatmap = Image.fromarray(np.uint8(cm.jet(cam) * 255))
-    heatmap = heatmap.resize((height, width), Image.ANTIALIAS)
 
-    heatmap[np.where(np.asarra(heatmap) < 0.2)] = 0
-    img_cam = heatmap * 0.5 + img
-    img_cam.save(output_path)
+def visualize_layer_activation_maps_superposed(model, img, img_name, conv_layer_name='conv2d_266'):
+    _, w_img, h_img, c_img = img.shape
+
+    conv_layer = model.get_layer(conv_layer_name)
+    get_output = K.function([model.layers[0].input],
+                            [conv_layer.output, model.layers[-1].output])
+    [feature_maps, predictions] = get_output([img])
+
+    feature_maps = feature_maps[0, :, :, :]
+    feature_maps = np.moveaxis(feature_maps, -1, 0)  # [nb_maps, w_map, h_map]
+
+    nb_maps, w_map, h_map = feature_maps.shape
+
+    feature_maps_cm = np.zeros([nb_maps, w_img, h_img, c_img])
+    for i in range(nb_maps):
+        map = feature_maps[i, :, :]
+        map /= np.max(map)  # rescale to [0,1]
+        map = np.asarray(
+            Image.fromarray(map).resize((h_img, w_img), Image.ANTIALIAS))  # resize from filter_size to input_size
+        heatmap = Image.fromarray(np.uint8(cm.jet(map) * 255))  # add Jet colormap
+        heatmap_np = np.asarray(heatmap).copy()
+        heatmap_np[np.where(map < 0.2)] = 0  # remove small activations
+        heatmap_np = heatmap_np / np.max(heatmap_np)  # rescale to [0,1]
+        img_map = heatmap_np[:, :, 0:3] * 0.5 + img[0]  # superpose heatmap and input image
+        img_map = 255 * img_map / np.max(img_map)
+        feature_maps_cm[i, :, :, :] = img_map
+
+    img_maps = util.plot_to_grid(feature_maps_cm)
+    file_name = '%s@%d_%s' % (conv_layer_name, nb_maps, img_name)
+
+    imsave('./%s' % file_name, img_maps)
+
+
+def visualize_layer_activation_map_max(model, img, img_name, conv_layer_name='conv2d_266'):
+    _, width, height, ch = img.shape
+
+    final_conv_layer = model.get_layer(conv_layer_name)
+    get_output = K.function([model.layers[0].input],
+                            [final_conv_layer.output, model.layers[-1].output])
+    [conv_outputs, predictions] = get_output([img])
+
+
+    conv_outputs = conv_outputs[0, :, :, :]
+    n_maps = conv_outputs.shape[-1]
+
+    '''
+    cam = np.zeros(dtype=np.float64, shape=conv_outputs.shape[0:2])
+    or i in range(n_maps):
+        cam = cam + conv_outputs[:, :, i]
+    cam /= n_maps
+    '''
+    from scipy import stats
+    cam = np.max(conv_outputs, axis=-1)
+
+    # might need gaussian filter for better viz
+    cam /= np.max(cam)                                                              # rescale to [0,1]
+    cam = np.asarray(Image.fromarray(cam).resize((height, width), Image.ANTIALIAS)) # resize from filter_size to input_size
+    heatmap = Image.fromarray(np.uint8(cm.jet(cam) * 255))                          # add Jet colormap
+    heatmap_np = np.asarray(heatmap).copy()
+    heatmap_np[np.where(cam < 0.2)] = 0                                             # remove small activations
+    heatmap_np = heatmap_np / np.max(heatmap_np)                                    # rescale to [0,1]
+    img_cam = heatmap_np[:,:,0:3] * 0.5 + img[0]                                    # superpose heatmap and input image
+    img_cam /= np.max(img_cam)                                                      # rescale to [0,1]
+
+    file_name = 'max_%s@%d_%s' % (conv_layer_name, n_maps, img_name)
+
+    Image.fromarray(np.uint8(img_cam * 255)).save(file_name)
 
 
 '''

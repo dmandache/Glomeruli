@@ -139,6 +139,7 @@ if __name__ == '__main__':
     parser.add_argument('--finetune', dest='finetune', default=False, action='store_true')
     parser.add_argument('--transfer', dest='transfer', default=False, action='store_true')
     parser.add_argument('--epochs', help='number of epochs')
+    parser.add_argument('--patience', help='number of epochs forcestopping without model improvement ')
     args = parser.parse_args()
 
     main(**vars(args))
