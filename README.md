@@ -16,6 +16,12 @@ arguments:
         |   +-- glomeruli
         |   +-- nonglomeruli
       ```
+   * else :
+      ```
+        +-- dir
+        |   +-- glomeruli
+        |   +-- nonglomeruli
+      ```
 * `--out` 
     * path to output directory
     * if argument is omitted, a folder is created, eg `./output_inception_finetune`
