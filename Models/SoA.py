@@ -25,6 +25,8 @@ import settings
                 layer.trainable = True  ## and change to False
 """
 
+project_dir = os.path.abspath(os.path.join(__file__, "../.."))
+
 '''
     Define model
 '''
@@ -35,9 +37,10 @@ def get_base_model(model_name, weights='imagenet'):
     if model_name == 'inception':
         # https://github.com/fchollet/deep-learning-models/releases/download/v0.5/inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5
 
-        wfile = "./imagenet_weights/inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5"
+        wfile = os.path.join(project_dir, "imagenet_weights/inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5")
         if weights == 'imagenet' and os.path.isfile(wfile):
             weights = wfile
+            print("weights loaded from local file {}".format(wfile))
         base_model = InceptionV3(weights=weights, include_top=False)
         BASE_LAYERS = len(InceptionV3(weights=None, include_top=False).layers)
         ALL_LAYERS = len(InceptionV3(weights=None, include_top=True).layers)
@@ -47,9 +50,10 @@ def get_base_model(model_name, weights='imagenet'):
     elif model_name == 'vgg':
         # https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5
 
-        wfile = "./imagenet_weights/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5"
+        wfile = os.path.join(project_dir, "imagenet_weights/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5")
         if weights == 'imagenet' and os.path.isfile(wfile):
             weights = wfile
+            print("weights loaded from local file {}".format(wfile))
         base_model = VGG16(weights=weights, include_top=False)
         BASE_LAYERS = len(VGG16(weights=None, include_top=False).layers)    # 19
         ALL_LAYERS = len(VGG16(weights=None, include_top=True).layers)      # 23
@@ -59,9 +63,10 @@ def get_base_model(model_name, weights='imagenet'):
     elif model_name == 'resnet':
         # https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5
 
-        wfile = "./imagenet_weights/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5"
+        wfile = os.path.join(project_dir, "imagenet_weights/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5")
         if weights == 'imagenet' and os.path.isfile(wfile):
             weights = wfile
+            print("weights loaded from local file {}".format(wfile))
         base_model = ResNet50(weights=weights, include_top=False)           # 174
         BASE_LAYERS = len(ResNet50(weights=None, include_top=False).layers)
         ALL_LAYERS = len(ResNet50(weights=None, include_top=True).layers)
@@ -129,7 +134,7 @@ def get_mid_layer_model(model):
 def train_finetune(model_name, train_generator, validation_generator, callback_list):
     global fine_tune_epoch
 
-    print('Finetuning !')
+    print('Finetuning ')
 
     model = get_model(model_name, settings.NUM_CLASSES, weights='imagenet')
 
@@ -173,7 +178,7 @@ def train_finetune(model_name, train_generator, validation_generator, callback_l
 
 
 def train_transfer(model_name, train_generator, validation_generator, callback_list):
-    print('Transfer learning !')
+    print('Transfer learning ')
 
     model = get_model(model_name, settings.NUM_CLASSES, weights='imagenet')
 
@@ -197,7 +202,7 @@ def train_transfer(model_name, train_generator, validation_generator, callback_l
 
 
 def train_from_scratch(model_name, train_generator, validation_generator, callback_list):
-    print('Training from scratch !')
+    print('Training from scratch ')
 
     model = get_model(model_name, settings.NUM_CLASSES, weights=None)
 
