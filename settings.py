@@ -4,8 +4,8 @@ class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
 
 weight_glom = 1
 
-class_weight = {class_dict['nonglomeruli']: 1,  # 0 : 1
-                class_dict['glomeruli']: weight_glom}  # 1 : 25
+class_weight = {class_dict['nonglomeruli']: 1,          # 0 : 1
+                class_dict['glomeruli']: weight_glom}   # 1 : 25
 
 DENSE_TRAIN_EPOCHS = 50
 FINE_TUNE_EPOCHS = 200

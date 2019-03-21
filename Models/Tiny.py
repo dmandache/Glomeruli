@@ -101,7 +101,7 @@ def get_model(num_classes=1):
     return model
 
 
-def train_model(train_generator, validation_generator, callback_list):
+def train(train_generator, validation_generator, callback_list):
 
     model = get_model(settings.NUM_CLASSES)
 

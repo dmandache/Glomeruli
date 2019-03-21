@@ -16,16 +16,11 @@ from Models import SoA, Tiny
 import settings
 
 
-fine_tune_epoch = 0
-
-
 def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=False, epochs=None):
-    global fine_tune_epoch
-
     model_name = model
 
     if dir == None:
-        settings.IMAGES_DIR_PATH = "/Users/diana/Documents/2018_Glomeruli/split/"
+        settings.IMAGES_DIR_PATH = "/Volumes/Raid1Data/2018_Glomeruli/split"
     else:
         settings.IMAGES_DIR_PATH = dir
 
@@ -79,8 +74,8 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
     checkpointer = ModelCheckpoint(
         filepath=settings.OUTPUT_DIR+'/model.hdf5',
         verbose=1,
-        monitor='val_acc',
-        mode='max',
+        monitor='val_loss',
+        mode='min',
         save_best_only=True)
 
     # Helper: Stop when we stop learning.
@@ -95,18 +90,19 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
         Train model
     '''
 
-    supported_models = ['inception','vgg','resnet','tiny']
+    supported_models = ['inception', 'vgg', 'resnet', 'tiny']
     if model_name not in supported_models:
-        print("Invalid model ! Please specify one of this arguments : {}".format(supported_models))
-        exit()
+        print("Invalid model ! Please specify one of these arguments : {} ! Using InceptionV3 by default.".format(supported_models))
+        model_name = 'inception'
 
+    fine_tune_epoch = None
     if model_name == 'tiny':
         model, history = Tiny.train(train_generator, validation_generator, callback_list)
     else:
         if transfer:
             model, history = SoA.train_transfer(model_name, train_generator, validation_generator, callback_list)
         elif finetune:
-            model, history = SoA.train_finetune(model_name, train_generator, validation_generator, callback_list)
+            model, history, fine_tune_epoch = SoA.train_finetune(model_name, train_generator, validation_generator, callback_list)
         else:
             model, history = SoA.train_from_scratch(model_name, train_generator, validation_generator, callback_list)
 
@@ -121,7 +117,8 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
     plt.style.use('seaborn')
     plt.plot(history.history['loss'], 'g.-', label='Train loss')
     plt.plot(history.history['val_loss'], 'r.-', label='Test loss')
-    #plt.axvline(x=fine_tune_epoch, color='gray', linestyle='dashed')
+    if fine_tune_epoch is not None:
+        plt.axvline(x=fine_tune_epoch, color='gray', linestyle='dashed', label='start finetuning')
     plt.legend()
     plt.xlabel('epoch')
     plt.ylabel('loss')
@@ -133,13 +130,13 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--dir', help='data directory')
-    parser.add_argument('--split', help='percentage of validation data, usually 20')
+    parser.add_argument('--split', help='percentage of validation data; recommended value = 20; '
+                                        'if not specified then data must be already split in train / test subdirs')
     parser.add_argument('--out', help='output directory')
     parser.add_argument('--model', help='inception / vgg / resnet / tiny')
     parser.add_argument('--finetune', dest='finetune', default=False, action='store_true')
     parser.add_argument('--transfer', dest='transfer', default=False, action='store_true')
     parser.add_argument('--epochs', help='number of epochs')
-    parser.add_argument('--patience', help='number of epochs forcestopping without model improvement ')
     args = parser.parse_args()
 
     main(**vars(args))
