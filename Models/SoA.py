@@ -33,6 +33,8 @@ def get_base_model(model_name, weights='imagenet'):
     global BASE_LAYERS, ALL_LAYERS, TRAINABLE_LAYERS, FC_LAYER_SIZE
 
     if model_name == 'inception':
+        # https://github.com/fchollet/deep-learning-models/releases/download/v0.5/inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5
+
         wfile = "./imagenet_weights/inception_v3_weights_tf_dim_ordering_tf_kernels_notop.h5"
         if weights == 'imagenet' and os.path.isfile(wfile):
             weights = wfile
@@ -43,6 +45,8 @@ def get_base_model(model_name, weights='imagenet'):
         FC_LAYER_SIZE = 1024
 
     elif model_name == 'vgg':
+        # https://github.com/fchollet/deep-learning-models/releases/download/v0.1/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5
+
         wfile = "./imagenet_weights/vgg16_weights_tf_dim_ordering_tf_kernels_notop.h5"
         if weights == 'imagenet' and os.path.isfile(wfile):
             weights = wfile
@@ -53,6 +57,8 @@ def get_base_model(model_name, weights='imagenet'):
         FC_LAYER_SIZE = 1024
 
     elif model_name == 'resnet':
+        # https://github.com/fchollet/deep-learning-models/releases/download/v0.2/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5
+
         wfile = "./imagenet_weights/resnet50_weights_tf_dim_ordering_tf_kernels_notop.h5"
         if weights == 'imagenet' and os.path.isfile(wfile):
             weights = wfile
