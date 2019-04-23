@@ -16,7 +16,7 @@ from Models import SoA, Tiny
 import settings
 
 
-def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=False, epochs=None):
+def main(dir=None, split=None, out=None, model=None, loss=None, finetune=False, transfer=False, epochs=None):
     model_name = model
 
     if dir == None:
@@ -59,6 +59,14 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
     if epochs is not None:
         settings.DENSE_TRAIN_EPOCHS = int(epochs)
 
+    if loss not in settings.losses_whitelist:
+        print("Invalid loss ! Please specify one of these arguments : {} ! Using 'crossentropy' by default."
+              .format(settings.losses_whitelist))
+        loss = 'crossentropy'
+    else:
+        settings.LOSS = loss
+
+
 
     '''
         Get data generators
@@ -89,10 +97,9 @@ def main(dir=None, split=None, out=None, model=None, finetune=False, transfer=Fa
     '''
         Train model
     '''
-
-    supported_models = ['inception', 'vgg', 'resnet', 'tiny']
-    if model_name not in supported_models:
-        print("Invalid model ! Please specify one of these arguments : {} ! Using InceptionV3 by default.".format(supported_models))
+    if model_name not in settings.model_whitelist:
+        print("Invalid model ! Please specify one of these arguments : {} ! Using InceptionV3 by default."
+              .format(settings.model_whitelist))
         model_name = 'inception'
 
     fine_tune_epoch = None
@@ -133,7 +140,10 @@ if __name__ == '__main__':
     parser.add_argument('--split', help='percentage of validation data; recommended value = 20; '
                                         'if not specified then data must be already split in train / test subdirs')
     parser.add_argument('--out', help='output directory')
-    parser.add_argument('--model', help='inception / vgg / resnet / tiny')
+    parser.add_argument('--model', default='inception', help='architecture : inception / vgg / resnet / tiny ;'
+                                                       ' default is inception')
+    parser.add_argument('--loss', default='crossentropy', help='loss to minimize : crossentropy / focal / expectation ;'
+                                                               ' default is crossentropy')
     parser.add_argument('--finetune', dest='finetune', default=False, action='store_true')
     parser.add_argument('--transfer', dest='transfer', default=False, action='store_true')
     parser.add_argument('--epochs', help='number of epochs')

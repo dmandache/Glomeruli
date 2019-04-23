@@ -4,6 +4,7 @@ from keras import optimizers
 from keras import backend as K
 from Models.Metrics import precision, recall, sensitivity, specificity, f1_score
 
+from Models import Losses
 import settings
 
 
@@ -80,13 +81,12 @@ def get_model(num_classes=1):
     model.add(Dense(1024, init='glorot_uniform'))
     model.add(Activation('relu'))
     model.add(Dropout(0.5))
-    model.add(Dense(num_classes, init='glorot_uniform'))
-    model.add(Activation('sigmoid'))
 
-    if num_classes is 1:
-        loss_function = 'binary_crossentropy'
-    else:
-        loss_function = 'categorical_crossentropy'
+    last_activation = 'sigmoid' if num_classes == 1 else 'softmax'
+    model.add(Dense(num_classes, init='glorot_uniform'))
+    model.add(Activation(last_activation))
+
+    loss_function = settings.get_loss_function()
 
     '''
         Adam optimization algo
@@ -117,7 +117,6 @@ def train(train_generator, validation_generator, callback_list):
         callbacks=callback_list)
 
     model = load_model(settings.OUTPUT_DIR+'/model.hdf5',
-                       custom_objects={'precision': precision,'recall': recall, 'sensitivity': sensitivity,
-                                       'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects=settings.CUSTOM_OBJECTS)
 
     return model, history

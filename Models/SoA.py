@@ -9,6 +9,7 @@ from keras.applications.vgg16 import VGG16
 from keras.applications.resnet50 import ResNet50
 
 from Models.Metrics import precision, recall, sensitivity, specificity, f1_score
+
 import settings
 
 """
@@ -87,7 +88,8 @@ def get_model(model_name, num_classes, weights='imagenet'):
     # let's add a fully-connected layer
     x = Dense(FC_LAYER_SIZE, activation='relu')(x)
     # and a logistic layer
-    predictions = Dense(num_classes, activation='sigmoid')(x)
+    last_activation = 'sigmoid' if num_classes == 1 else 'softmax'
+    predictions = Dense(num_classes, activation=last_activation)(x)
 
     # this is the model we will train
     model = Model(inputs=[base_model.input], outputs=[predictions])
@@ -104,7 +106,7 @@ def get_top_layer_model(model):
         layer.trainable = True
 
     # compile the model (should be done after setting layers to non-trainable)
-    model.compile(optimizer='adam', loss='binary_crossentropy',
+    model.compile(optimizer='adam', loss=settings.get_loss_function(),
                   metrics=['accuracy', precision, recall, sensitivity, specificity, f1_score])
 
     return model
@@ -121,7 +123,7 @@ def get_mid_layer_model(model):
     # we need to recompile the model for these modifications to take effect
     # we use SGD with a low learning rate
     model.compile(optimizer=optimizers.SGD(lr=0.001, momentum=0.9, decay=1e-6),
-                  loss='binary_crossentropy',
+                  loss=settings.get_loss_function(),
                   metrics=['accuracy', precision, recall, sensitivity, specificity, f1_score])
 
     return model
@@ -152,8 +154,7 @@ def train_finetune(model_name, train_generator, validation_generator, callback_l
         callbacks=callback_list)
 
     model = load_model(settings.OUTPUT_DIR+'/model.hdf5',
-                       custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
-                                       'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects=settings.CUSTOM_OBJECTS)
 
     fine_tune_epoch = len(history.history['loss'])
     print('Epoch when fine-tuning starts: %d' % fine_tune_epoch)
@@ -172,8 +173,7 @@ def train_finetune(model_name, train_generator, validation_generator, callback_l
         callbacks=callback_list)
 
     model = load_model(settings.OUTPUT_DIR+'/model.hdf5',
-                       custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
-                                       'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects=settings.CUSTOM_OBJECTS)
     return model, history, fine_tune_epoch
 
 
@@ -196,8 +196,7 @@ def train_transfer(model_name, train_generator, validation_generator, callback_l
         callbacks=callback_list)
 
     model = load_model(settings.OUTPUT_DIR + '/model.hdf5',
-                       custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
-                                       'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects=settings.CUSTOM_OBJECTS)
     return model, history
 
 
@@ -206,7 +205,7 @@ def train_from_scratch(model_name, train_generator, validation_generator, callba
 
     model = get_model(model_name, settings.NUM_CLASSES, weights=None)
 
-    model.compile(optimizer='adam', loss='binary_crossentropy',
+    model.compile(optimizer='adam', loss=settings.get_loss_function(),
                   metrics=['accuracy', precision, recall, sensitivity, specificity, f1_score])
 
     history = model.fit_generator(
@@ -219,7 +218,6 @@ def train_from_scratch(model_name, train_generator, validation_generator, callba
         callbacks=callback_list)
 
     model = load_model(settings.OUTPUT_DIR+'/model.hdf5',
-                       custom_objects={'precision': precision, 'recall': recall, 'sensitivity': sensitivity,
-                                       'specificity': specificity, 'f1_score': f1_score})
+                       custom_objects=settings.CUSTOM_OBJECTS)
 
     return model, history

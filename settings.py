@@ -1,4 +1,4 @@
-from Models.Metrics import precision, recall, sensitivity, specificity, f1_score
+from Models import Losses, Metrics
 
 class_dict = {'nonglomeruli': 0, 'glomeruli': 1}
 
@@ -27,6 +27,22 @@ OUTPUT_DIR = './output'
 NUM_TRAIN_SAMPLES = 0
 NUM_TEST_SAMPLES = 0
 
-CUSTOM_OBJECTS = {'precision': precision, 'recall': recall,
-                  'sensitivity': sensitivity, 'specificity': specificity,
-                  'f1_score': f1_score}
+CUSTOM_OBJECTS = {'precision': Metrics.precision, 'recall': Metrics.recall,
+                  'sensitivity': Metrics.sensitivity, 'specificity': Metrics.specificity,
+                  'f1_score': Metrics.f1_score}
+
+losses_whitelist = ['crossentropy', 'expectation', 'focal']
+
+LOSS = 'crossentropy'
+
+model_whitelist = ['inception', 'vgg', 'resnet', 'tiny']
+
+
+def get_loss_function():
+    if LOSS == 'crossentropy':
+        loss_function = 'binary_crossentropy' if NUM_CLASSES is 1 else 'categorical_crossentropy'
+    elif LOSS == 'focal':
+        loss_function = Losses.binary_focal_loss() if NUM_CLASSES is 1 else Losses.categorical_focal_loss()
+    elif LOSS == 'expectation':
+        loss_function = Losses.binary_expectation_loss_normalized() if NUM_CLASSES is 1 else Losses.normalized_categorical_expectation_loss()
+    return loss_function
