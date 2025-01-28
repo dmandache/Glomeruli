@@ -74,5 +74,5 @@ arguments:
 * `--model` path to saved (trained) model
 * `--weights` mention if you want to plot the **weights** of the model
 * `--activations` mention if you want to plot the **filter activations** of the model
-    * `--img` path to image to plot activations for
+* `--img` path to image to plot activations for
 * `--maxinput` mention if you want to plot the **maximum filter activation** of the model
